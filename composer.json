@@ -1,0 +1,17 @@
+{
+	"name": "rhymix/rhymix-sociallogin",
+	"description": "Rhymix Social Login Module",
+	"homepage": "https://github.com/rhymix/rhymix-sociallogin",
+	"license": "GPL-2.0+",
+	"type": "project",
+	"authors": [
+		{ "name": "Rhymix Developers and Contributors", "email": "devops@rhymix.org" }
+	],
+	"require": {
+		"php": ">=7.4",
+		"abraham/twitteroauth": "2.*",
+		"lcobucci/jwt": "4.0.*",
+		"league/oauth2-github": "2.0.*",
+		"patrickbussmann/oauth2-apple": "0.2.*"
+	}
+}
