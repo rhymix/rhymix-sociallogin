@@ -30,6 +30,8 @@ abstract class Base
 	 */
 	protected function __construct()
 	{
+		include_once \RX_BASEDIR . 'modules/sociallogin/vendor/autoload.php';
+
 		$this->service = strtolower(class_basename($this));
 		$this->profile = array(
 			'sns_id'       => '',
