@@ -22,8 +22,8 @@ class Admin extends Base
 
 		Context::set('sns_twitter_apple_cond', version_compare(PHP_VERSION, '7.4.0', '>='));
 
-		$this->setTemplatePath($this->module_path . 'tpl');
-		Context::addJsFile($this->module_path . 'tpl/js/sociallogin_admin.js');
+		$this->setTemplatePath($this->module_path . 'views');
+		Context::loadFile([$this->module_path . 'views/js/sociallogin_admin.js', 'body']);
 	}
 
 	function dispSocialloginAdminSettingApi()

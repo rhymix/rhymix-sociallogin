@@ -31,7 +31,7 @@ class User extends Base
 		}
 
 		Context::set('config', $config);
-		Context::loadFile([$this->module_path . 'tpl/js/sociallogin.js', 'body']);
+		Context::loadFile([$this->module_path . 'views/js/sociallogin.js', 'body']);
 	}
 
 	/**
