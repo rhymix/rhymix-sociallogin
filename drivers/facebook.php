@@ -65,7 +65,7 @@ class Facebook extends Base
 
 		// 토큰 삽입
 		$accessValue['access'] = $token['access_token'];
-		\SocialloginController::getInstance()->setDriverAuthData('facebook', 'token', $accessValue);
+		\Rhymix\Modules\Sociallogin\Controllers\Connect::setDriverAuthData('facebook', 'token', $accessValue);
 
 		return new \BaseObject();
 	}
@@ -137,7 +137,7 @@ class Facebook extends Base
 		$profileValue['sns_id'] = $profile['id'];
 		$profileValue['user_name'] = $profile['name'];
 		$profileValue['etc'] = $profile;
-		\SocialloginController::getInstance()->setDriverAuthData('facebook', 'profile', $profileValue);
+		\Rhymix\Modules\Sociallogin\Controllers\Connect::setDriverAuthData('facebook', 'profile', $profileValue);
 		
 		return new \BaseObject();
 	}

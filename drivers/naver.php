@@ -55,7 +55,7 @@ class Naver extends Base
 		$accessValue['access'] = $token['access_token'];
 		$accessValue['refresh'] = $token['refresh_token'];
 
-		\SocialloginController::getInstance()->setDriverAuthData('naver', 'token', $accessValue);
+		\Rhymix\Modules\Sociallogin\Controllers\Connect::setDriverAuthData('naver', 'token', $accessValue);
 
 		return new \BaseObject();
 	}
@@ -121,7 +121,7 @@ class Naver extends Base
 		
 		$profileValue['etc'] = $profile;
 
-		\SocialloginController::getInstance()->setDriverAuthData('naver', 'profile', $profileValue);
+		\Rhymix\Modules\Sociallogin\Controllers\Connect::setDriverAuthData('naver', 'profile', $profileValue);
 
 		return new \BaseObject();
 	}

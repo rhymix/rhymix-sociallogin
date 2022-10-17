@@ -5,7 +5,6 @@ namespace Rhymix\Modules\Sociallogin\Controllers;
 use Context;
 use FileHandler;
 use MemberController;
-use SocialloginController;
 use SocialloginModel;
 use Rhymix\Modules\Sociallogin\Base;
 
@@ -51,7 +50,7 @@ class EventHandlers extends Base
 
 		if($oSocialData && isset($_SESSION['sociallogin_access_data']))
 		{
-			SocialloginController::getInstance()->insertMemberSns($obj->member_srl, $_SESSION['sociallogin_access_data']);
+			Connect::getInstance()->insertMemberSns($obj->member_srl, $_SESSION['sociallogin_access_data']);
 		}
 	}
 

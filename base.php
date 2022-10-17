@@ -74,4 +74,16 @@ class Base extends \ModuleObject
 		$class_name = '\\Rhymix\\Modules\\Sociallogin\\Drivers\\' . ucfirst($driver_name);
 		return $class_name::getInstance();
 	}
+	
+	/**
+	 * Clear session info
+	 */
+	public static function clearSession()
+	{
+		unset($_SESSION['sociallogin_driver_auth']);
+		unset($_SESSION['sociallogin_auth']);
+		unset($_SESSION['sociallogin_access_data']);
+		unset($_SESSION['tmp_sociallogin_input_add_info']);
+		unset($_SESSION['sociallogin_current']);
+	}
 }

@@ -4,10 +4,10 @@
 		<action name="dispSocialloginSnsManage" class="Controllers\User" standalone="true"/>
 		<action name="dispSocialloginConnectSns" class="Controllers\User" standalone="true"/>
 		<action name="dispSocialloginSnsProfile" class="Controllers\User" standalone="true"/>
-
-		<action name="procSocialloginSnsClear" type="controller" standalone="true"/>
-		<action name="procSocialloginSnsLinkage" type="controller" standalone="true"/>
-		<action name="procSocialloginCallback" type="controller" standalone="true" method="GET|POST" check_csrf="false" />
+		<action name="procSocialloginSnsClear" class="Controllers\User" standalone="true"/>
+		<action name="procSocialloginSnsLinkage" class="Controllers\User" standalone="true"/>
+		
+		<action name="procSocialloginCallback" class="Controllers\Connect" standalone="true" method="GET|POST" check_csrf="false" />
 
 		<action name="dispSocialloginAdminSettingApi" class="Controllers\Admin" menu_name="sociallogin"/>
 		<action name="dispSocialloginAdminSetting" class="Controllers\Admin" menu_name="sociallogin"/>

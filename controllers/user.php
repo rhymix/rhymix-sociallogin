@@ -8,6 +8,8 @@ use MemberModel;
 use Mobile;
 use SocialloginModel;
 use Rhymix\Framework\Exceptions\InvalidRequest;
+use Rhymix\Framework\Exception;
+use Rhymix\Framework\Session;
 use Rhymix\Modules\Sociallogin\Base;
 
 class User extends Base
@@ -38,7 +40,7 @@ class User extends Base
 	{
 		if (!Context::get('is_logged'))
 		{
-			throw new \Rhymix\Framework\Exception('msg_not_logged');
+			throw new Exception('msg_not_logged');
 		}
 
 		foreach (self::getConfig()->sns_services as $key => $val)
@@ -80,7 +82,7 @@ class User extends Base
 		$service = Context::get('service');
 		if (!$service || !in_array($service, self::getConfig()->sns_services))
 		{
-			throw new \Rhymix\Framework\Exception('msg_not_support_service_login');
+			throw new Exception('msg_not_support_service_login');
 		}
 		if (!$oDriver = $this->getDriver($service))
 		{
@@ -94,11 +96,11 @@ class User extends Base
 
 		if ($type == 'register' && !Context::get('is_logged'))
 		{
-			throw new \Rhymix\Framework\Exception('msg_not_logged');
+			throw new Exception('msg_not_logged');
 		}
 		else if ($type == 'login' && Context::get('is_logged'))
 		{
-			throw new \Rhymix\Framework\Exception('already_logged');
+			throw new Exception('already_logged');
 		}
 
 		// 인증 메일 유효 시간
@@ -179,5 +181,128 @@ class User extends Base
 		Context::set('sns_services', $sns_services);
 
 		$this->setTemplateFile('sns_profile');
+	}
+	
+	/**
+	 * @brief SNS 연결
+	 **/
+	public function procSocialloginSnsLinkage()
+	{
+		if (!$this->user->isMember())
+		{
+			throw new Exception('msg_not_logged');
+		}
+
+		if (!$service = Context::get('service'))
+		{
+			throw new InvalidRequest;
+		}
+
+		if (!$oDriver = $this->getDriver($service))
+		{
+			throw new InvalidRequest;
+		}
+
+		if (!($sns_info = SocialloginModel::getMemberSnsByService($service)) || !$sns_info->name)
+		{
+			throw new Exception('msg_not_linkage_sns_info');
+		}
+
+		// 토큰 넣기
+		$tokenData = SocialloginModel::setAvailableAccessToken($oDriver, $sns_info);
+
+		// 연동 체크
+		if (($check = $oDriver->checkLinkage()) && $check instanceof Object && !$check->toBool() && $sns_info->linkage != 'Y')
+		{
+			return $check;
+		}
+
+		$args = new \stdClass;
+		$args->service = $service;
+		$args->linkage = ($sns_info->linkage == 'Y') ? 'N' : 'Y';
+		$args->member_srl = Context::get('logged_info')->member_srl;
+
+		$output = executeQuery('sociallogin.updateMemberSns', $args);
+		if (!$output->toBool())
+		{
+			return $output;
+		}
+
+		// 로그 기록
+		$info = new \stdClass;
+		$info->sns = $service;
+		$info->linkage = $args->linkage;
+		SocialloginModel::logRecord($this->act, $info);
+
+		$this->setMessage('msg_success_linkage_sns');
+
+		$this->setRedirectUrl(getNotEncodedUrl('', 'mid', Context::get('mid'), 'act', 'dispSocialloginSnsManage'));
+	}
+	
+	/**
+	 * SNS 연결 해제
+	 */
+	public function procSocialloginSnsClear()
+	{
+		if (!$this->user->isMember())
+		{
+			throw new Exception('msg_not_logged');
+		}
+
+		if (!$service = Context::get('service'))
+		{
+			throw new InvalidRequest;
+		}
+
+		if (!$oDriver = $this->getDriver($service))
+		{
+			throw new InvalidRequest;
+		}
+
+		if (!($sns_info = SocialloginModel::getMemberSnsByService($service)) || !$sns_info->name)
+		{
+			throw new InvalidRequest;
+		}
+
+		if (self::getConfig()->sns_login == 'Y' && self::getConfig()->default_signup != 'Y')
+		{
+			// TODO(BJRambo) : check get to list;
+			$sns_list = SocialloginModel::getMemberSnsList();
+
+			if (!is_array($sns_list))
+			{
+				$sns_list = array($sns_list);
+			}
+
+			if (count($sns_list) < 2)
+			{
+				throw new Exception('msg_not_clear_sns_one');
+			}
+		}
+
+		$args = new \stdClass;
+		$args->service = $service;
+		$args->member_srl = Session::getMemberSrl();
+
+		$output = executeQuery('sociallogin.deleteMemberSns', $args);
+		if (!$output->toBool())
+		{
+			return $output;
+		}
+
+		// 토큰 넣기
+		$tokenData = SocialloginModel::setAvailableAccessToken($oDriver, $sns_info, false);
+
+		// 토큰 파기
+		$oDriver->revokeToken($tokenData['access']);
+
+		// 로그 기록
+		$info = new \stdClass;
+		$info->sns = $service;
+		SocialloginModel::logRecord($this->act, $info);
+
+		$this->setMessage('msg_success_sns_register_clear');
+
+		$this->setRedirectUrl(getNotEncodedUrl('', 'mid', Context::get('mid'), 'act', 'dispSocialloginSnsManage'));
 	}
 }

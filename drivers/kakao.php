@@ -49,7 +49,7 @@ class Kakao extends Base
 		$accessValue['access'] = $token['access_token'];
 		$accessValue['refresh'] = $token['refresh_token'];
 
-		\SocialloginController::getInstance()->setDriverAuthData('kakao', 'token', $accessValue);
+		\Rhymix\Modules\Sociallogin\Controllers\Connect::setDriverAuthData('kakao', 'token', $accessValue);
 		
 		return new \BaseObject();
 	}
@@ -101,7 +101,7 @@ class Kakao extends Base
 		$profileValue['url'] = $profile['story']['permalink'] ?: 'http://www.kakao.com/talk';
 		$profileValue['etc'] = $profile;
 
-		\SocialloginController::getInstance()->setDriverAuthData('kakao', 'profile', $profileValue);
+		\Rhymix\Modules\Sociallogin\Controllers\Connect::setDriverAuthData('kakao', 'profile', $profileValue);
 		
 		return new \BaseObject();
 	}

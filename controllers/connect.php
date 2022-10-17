@@ -1,160 +1,46 @@
 <?php
 
-class SocialloginController extends \Rhymix\Modules\Sociallogin\Base
+namespace Rhymix\Modules\Sociallogin\Controllers;
+
+use BaseObject;
+use Context;
+use FileHandler;
+use MemberController;
+use MemberModel;
+use PointController;
+use SocialloginModel;
+use Rhymix\Framework\Exceptions\InvalidRequest;
+use Rhymix\Framework\Exception;
+use Rhymix\Modules\Sociallogin\Base;
+
+class Connect extends Base
 {
-	function init()
-	{
-	}
-	
-	/**
-	 * @brief SNS 해제
-	 **/
-	function procSocialloginSnsClear()
-	{
-		if (!$this->user->isMember())
-		{
-			throw new Rhymix\Framework\Exception('msg_not_logged');
-		}
-
-		if (!$service = Context::get('service'))
-		{
-			throw new Rhymix\Framework\Exceptions\InvalidRequest();
-		}
-
-		if (!$oDriver = $this->getDriver($service))
-		{
-			throw new Rhymix\Framework\Exceptions\InvalidRequest();
-		}
-
-		if (!($sns_info = SocialloginModel::getMemberSnsByService($service)) || !$sns_info->name)
-		{
-			throw new Rhymix\Framework\Exceptions\InvalidRequest();
-		}
-
-		if (self::getConfig()->sns_login == 'Y' && self::getConfig()->default_signup != 'Y')
-		{
-			// TODO(BJRambo) : check get to list;
-			$sns_list = SocialloginModel::getMemberSnsList();
-
-			if (!is_array($sns_list))
-			{
-				$sns_list = array($sns_list);
-			}
-
-			if (count($sns_list) < 2)
-			{
-				throw new Rhymix\Framework\Exception('msg_not_clear_sns_one');
-			}
-		}
-
-		$args = new stdClass;
-		$args->service = $service;
-		$args->member_srl = Rhymix\Framework\Session::getMemberSrl();
-
-		$output = executeQuery('sociallogin.deleteMemberSns', $args);
-		if (!$output->toBool())
-		{
-			return $output;
-		}
-
-		// 토큰 넣기
-		$tokenData = SocialloginModel::setAvailableAccessToken($oDriver, $sns_info, false);
-
-		// 토큰 파기
-		$oDriver->revokeToken($tokenData['access']);
-
-		// 로그 기록
-		$info = new stdClass;
-		$info->sns = $service;
-		SocialloginModel::logRecord($this->act, $info);
-
-		$this->setMessage('msg_success_sns_register_clear');
-
-		$this->setRedirectUrl(getNotEncodedUrl('', 'mid', Context::get('mid'), 'act', 'dispSocialloginSnsManage'));
-	}
-
-	/**
-	 * @brief SNS 연동설정
-	 **/
-	function procSocialloginSnsLinkage()
-	{
-		if (!$this->user->isMember())
-		{
-			throw new Rhymix\Framework\Exception('msg_not_logged');
-		}
-
-		if (!$service = Context::get('service'))
-		{
-			throw new Rhymix\Framework\Exceptions\InvalidRequest();
-		}
-
-		if (!$oDriver = $this->getDriver($service))
-		{
-			throw new Rhymix\Framework\Exceptions\InvalidRequest();
-		}
-
-		if (!($sns_info = SocialloginModel::getMemberSnsByService($service)) || !$sns_info->name)
-		{
-			throw new Rhymix\Framework\Exception('msg_not_linkage_sns_info');
-		}
-
-		// 토큰 넣기
-		$tokenData = SocialloginModel::setAvailableAccessToken($oDriver, $sns_info);
-
-		// 연동 체크
-		if (($check = $oDriver->checkLinkage()) && $check instanceof Object && !$check->toBool() && $sns_info->linkage != 'Y')
-		{
-			return $check;
-		}
-
-		$args = new stdClass;
-		$args->service = $service;
-		$args->linkage = ($sns_info->linkage == 'Y') ? 'N' : 'Y';
-		$args->member_srl = Context::get('logged_info')->member_srl;
-
-		$output = executeQuery('sociallogin.updateMemberSns', $args);
-		if (!$output->toBool())
-		{
-			return $output;
-		}
-
-		// 로그 기록
-		$info = new stdClass;
-		$info->sns = $service;
-		$info->linkage = $args->linkage;
-		SocialloginModel::logRecord($this->act, $info);
-
-		$this->setMessage('msg_success_linkage_sns');
-
-		$this->setRedirectUrl(getNotEncodedUrl('', 'mid', Context::get('mid'), 'act', 'dispSocialloginSnsManage'));
-	}
-
 	/**
 	 * @brief Callback
 	 **/
-	function procSocialloginCallback()
+	public function procSocialloginCallback()
 	{
 		// 서비스 체크
 		if (!($service = Context::get('service')) || !in_array($service, self::getConfig()->sns_services))
 		{
-			throw new Rhymix\Framework\Exceptions\InvalidRequest();
+			throw new InvalidRequest;
 		}
 		// 라이브러리 체크
 		if (!$oDriver = $this->getDriver($service))
 		{
-			throw new Rhymix\Framework\Exceptions\InvalidRequest();
+			throw new InvalidRequest;
 		}
 		
 		// 인증 세션 체크
 		if (!$_SESSION['sociallogin_auth']['state'])
 		{
-			throw new Rhymix\Framework\Exceptions\InvalidRequest();
+			throw new InvalidRequest;
 		}
 		
 		// 타입 세션 체크
 		if (!$type = $_SESSION['sociallogin_auth']['type'])
 		{
-			throw new Rhymix\Framework\Exceptions\InvalidRequest();
+			throw new InvalidRequest;
 		}
 		
 		$_SESSION['sociallogin_current']['mid'] = $_SESSION['sociallogin_auth']['mid'];
@@ -198,7 +84,7 @@ class SocialloginController extends \Rhymix\Modules\Sociallogin\Base
 			}
 			else if ($type == 'login')
 			{
-				$output = $this->LoginSns($oDriver);
+				$output = $this->loginSns($oDriver);
 				if (!$output->toBool())
 				{
 					$error = $output->getMessage();
@@ -228,7 +114,7 @@ class SocialloginController extends \Rhymix\Modules\Sociallogin\Base
 		}
 
 		// 로그 기록
-		$info = new stdClass;
+		$info = new \stdClass;
 		$info->msg = $msg;
 		$info->type = $type;
 		$info->sns = $service;
@@ -237,7 +123,7 @@ class SocialloginController extends \Rhymix\Modules\Sociallogin\Base
 		// 오류
 		if ($error)
 		{
-			throw new Rhymix\Framework\Exception($error);
+			throw new Exception($error);
 		}
 
 		if ($msg)
@@ -263,9 +149,9 @@ class SocialloginController extends \Rhymix\Modules\Sociallogin\Base
 	 * @param $oDriver \Rhymix\Modules\Sociallogin\Drivers\Base
 	 * @param null $member_srl
 	 * @param false $login
-	 * @return BaseObject|object|SocialloginController
+	 * @return BaseObject|object|self
 	 */
-	function registerSns($oDriver, $member_srl = null, $login = false)
+	public function registerSns($oDriver, $member_srl = null, $login = false)
 	{
 		if (!$member_srl)
 		{
@@ -274,7 +160,7 @@ class SocialloginController extends \Rhymix\Modules\Sociallogin\Base
 		$config = self::getConfig();
 		if ($config->sns_login != 'Y' && !$member_srl)
 		{
-			throw new Rhymix\Framework\Exception('msg_not_sns_login');
+			throw new Exception('msg_not_sns_login');
 		}
 
 		$service = $oDriver->getService();
@@ -283,13 +169,13 @@ class SocialloginController extends \Rhymix\Modules\Sociallogin\Base
 		$id = $serviceAccessData->profile['sns_id'];
 		if (!$id)
 		{
-			throw new Rhymix\Framework\Exception('msg_errer_api_connect');
+			throw new Exception('msg_errer_api_connect');
 		}
 		
 		// SNS ID 조회
 		if (($sns_info = SocialloginModel::getMemberSnsById($id, $service)) && $sns_info->member_srl)
 		{
-			throw new Rhymix\Framework\Exception('msg_already_registed_sns');
+			throw new Exception('msg_already_registed_sns');
 		}
 
 		/** @var memberModel $oMemberModel */
@@ -302,7 +188,7 @@ class SocialloginController extends \Rhymix\Modules\Sociallogin\Base
 			{
 				if ($oMemberModel->getMemberInfoByMemberSrl($member_srl)->member_srl)
 				{
-					throw new Rhymix\Framework\Exception('msg_can_not_sns_login_by_email');
+					throw new Exception('msg_can_not_sns_login_by_email');
 				}
 			}
 		}
@@ -310,7 +196,7 @@ class SocialloginController extends \Rhymix\Modules\Sociallogin\Base
 		// 회원 가입 진행
 		if (!$member_srl)
 		{
-			$password = Rhymix\Framework\Password::getRandomPassword(13);
+			$password = \Rhymix\Framework\Password::getRandomPassword(13);
 			$nick_name = preg_replace('/[\pZ\pC]+/u', '', $serviceAccessData->profile['user_name']);
 
 			if ($oMemberModel->getMemberSrlByNickName($nick_name))
@@ -373,7 +259,7 @@ class SocialloginController extends \Rhymix\Modules\Sociallogin\Base
 				}
 
 				$path_parts = pathinfo(parse_url($oDriver->getProfileImage(), PHP_URL_PATH));
-				$randomString = Rhymix\Framework\Security::getRandom(32);
+				$randomString = \Rhymix\Framework\Security::getRandom(32);
 				$tmp_file = "{$tmp_dir}{$randomString}profile.{$path_parts['extension']}";
 
 				if(FileHandler::getRemoteFile($oDriver->getProfileImage(), $tmp_file, null, 3, 'GET', null, array(), array(), array(), array('ssl_verify_peer' => false)))
@@ -385,7 +271,7 @@ class SocialloginController extends \Rhymix\Modules\Sociallogin\Base
 			// 회원 정보에서 추가 입력할 데이터가 있을경우 세션값에 소셜정보 입력 후 회원가입 항목으로 이동
 			if ($boolRequired)
 			{
-				$args = new stdClass;
+				$args = new \stdClass;
 				$args->refresh_token = $serviceAccessData->token['refresh'];
 				// 트위터의 경우 access token 자체가 다른방식으로 저장됨.
 				if($oDriver->getService() == 'twitter')
@@ -429,11 +315,11 @@ class SocialloginController extends \Rhymix\Modules\Sociallogin\Base
 			{
 				$output = getController('member')->procMemberInsert();
 			}
-			catch (\Rhymix\Framework\Exception $exception)
+			catch (Exception $exception)
 			{
 				// 리턴시에도 세션값을 비워줘야함
 				unset($_SESSION['tmp_sociallogin_input_add_info']);
-				throw new Rhymix\Framework\Exception($exception->getMessage());
+				throw new Exception($exception->getMessage());
 			}
 			unset($_SESSION['tmp_sociallogin_input_add_info']);
 			
@@ -454,7 +340,7 @@ class SocialloginController extends \Rhymix\Modules\Sociallogin\Base
 			// 가입 완료 체크
 			if (!$member_srl = $oMemberModel->getMemberSrlByEmailAddress($email))
 			{
-				throw new Rhymix\Framework\Exception('msg_error_register_sns');
+				throw new Exception('msg_error_register_sns');
 			}
 
 			// 이전 로그인 기록이 있으면 가입 포인트 제거
@@ -462,13 +348,13 @@ class SocialloginController extends \Rhymix\Modules\Sociallogin\Base
 			{
 				Context::set('__point_message__', Context::getLang('PHC_member_register_sns_login'));
 
-				pointController::getInstance()->setPoint($member_srl, 0, 'update');
+				PointController::getInstance()->setPoint($member_srl, 0, 'update');
 			}
 
 			// 서명 등록
 			if ($extend->signature)
 			{
-				memberController::getInstance()->putSignature($member_srl, $extend->signature);
+				MemberController::getInstance()->putSignature($member_srl, $extend->signature);
 			}
 		}
 		// 이미 가입되어 있었다면 SNS 등록만 진행
@@ -480,19 +366,19 @@ class SocialloginController extends \Rhymix\Modules\Sociallogin\Base
 				// 로그인에서 등록 요청이 온 경우 SNS 정보 삭제 후 재등록 (SNS ID가 달라졌다고 판단)
 				if ($login)
 				{
-					$args = new stdClass;
+					$args = new \stdClass;
 					$args->service = $service;
 					$args->member_srl = $member_srl;
 					executeQuery('sociallogin.deleteMemberSns', $args);
 				}
 				else
 				{
-					throw new Rhymix\Framework\Exceptions\InvalidRequest();
+					throw new InvalidRequest;
 				}
 			}
 		}
 
-		$args = new stdClass;
+		$args = new \stdClass;
 		$args->refresh_token = $serviceAccessData->token['refresh'];
 		// 트위터의 경우 access token 자체가 다른방식으로 저장됨.
 		if($oDriver->getService() == 'twitter')
@@ -542,7 +428,7 @@ class SocialloginController extends \Rhymix\Modules\Sociallogin\Base
 	 * @param $oDriver \Rhymix\Modules\Sociallogin\Drivers\Base
 	 * @return void
 	 */
-	function insertMemberSns($member_srl, $oAuthArgs)
+	public function insertMemberSns($member_srl, $oAuthArgs)
 	{
 		$oAuthArgs->member_srl = $member_srl;
 		$return_output = executeQuery('sociallogin.insertMemberSns', $oAuthArgs);
@@ -557,25 +443,25 @@ class SocialloginController extends \Rhymix\Modules\Sociallogin\Base
 	/**
 	 * @brief SNS 로그인
 	 * @param $oDriver \Rhymix\Modules\Sociallogin\Drivers\Base
-	 * @return BaseObject|object|SocialloginController
+	 * @return BaseObject|object|self
 	 */
-	function LoginSns($oDriver)
+	public function loginSns($oDriver)
 	{
 		if (self::getConfig()->sns_login != 'Y')
 		{
-			throw new Rhymix\Framework\Exception('msg_not_sns_login');
+			throw new Exception('msg_not_sns_login');
 		}
 
 		if ($this->user->isMember())
 		{
-			throw new Rhymix\Framework\Exception('already_logged');
+			throw new Exception('already_logged');
 		}
 		
 		$service = $oDriver->getService();
 		$serviceAccessData = SocialloginModel::getAccessData($service);
 		if (!$serviceAccessData->profile['sns_id'])
 		{
-			throw new Rhymix\Framework\Exception('msg_errer_api_connect');
+			throw new Exception('msg_errer_api_connect');
 		}
 
 		// SNS ID로 회원 검색
@@ -583,9 +469,9 @@ class SocialloginController extends \Rhymix\Modules\Sociallogin\Base
 		if (($sns_info = SocialloginModel::getMemberSnsById($serviceAccessData->profile['sns_id'], $service)) && $sns_info->member_srl)
 		{
 			// 탈퇴한 회원이면 삭제후 등록 시도
-			if (!($member_info = memberModel::getMemberInfoByMemberSrl($sns_info->member_srl)) || !$member_info->member_srl)
+			if (!($member_info = MemberModel::getMemberInfoByMemberSrl($sns_info->member_srl)) || !$member_info->member_srl)
 			{
-				$args = new stdClass;
+				$args = new \stdClass;
 				$args->member_srl = $sns_info->member_srl;
 				executeQuery('sociallogin.deleteMemberSns', $args);
 			}
@@ -602,7 +488,7 @@ class SocialloginController extends \Rhymix\Modules\Sociallogin\Base
 			// 인증 메일
 			if ($member_info->denied == 'Y')
 			{
-				$args = new stdClass;
+				$args = new \stdClass;
 				$args->member_srl = $member_info->member_srl;
 				$output = executeQuery('member.chkAuthMail', $args);
 
@@ -635,7 +521,7 @@ class SocialloginController extends \Rhymix\Modules\Sociallogin\Base
 			$_SESSION['sns_login'] = $oDriver->getService();
 
 			// 로그인시마다 SNS 회원 정보 갱신
-			$args = new stdClass;
+			$args = new \stdClass;
 			$args->refresh_token = $serviceAccessData->token['refresh'];
 			// 트위터의 경우 access token 자체가 다른방식으로 저장됨.
 			if($oDriver->getService() == 'twitter')
@@ -680,18 +566,18 @@ class SocialloginController extends \Rhymix\Modules\Sociallogin\Base
 	 * @param $oDriver \Rhymix\Modules\Sociallogin\Drivers\Base
 	 * @return Bool
 	 */
-	function reCheckSns($oDriver, $type = 'recheck')
+	public function reCheckSns($oDriver, $type = 'recheck')
 	{
 		if (!$this->user->isMember())
 		{
-			throw new Rhymix\Framework\Exceptions\InvalidRequest();
+			throw new InvalidRequest;
 		}
 
 		$service = $oDriver->getService();
 		$serviceAccessData = SocialloginModel::getAccessData($service);
 		if (!$serviceAccessData->profile['sns_id'])
 		{
-			throw new Rhymix\Framework\Exception('msg_errer_api_connect');
+			throw new Exception('msg_errer_api_connect');
 		}
 
 		// SNS ID로 회원 검색
@@ -727,7 +613,7 @@ class SocialloginController extends \Rhymix\Modules\Sociallogin\Base
 	 * @param $args
 	 * @return object
 	 */
-	function replaceSignUpFormBySocial($args)
+	public function replaceSignUpFormBySocial($args)
 	{
 		$socialLoginUserData = SocialloginModel::getSocialSignUpUserData();
 
@@ -742,7 +628,7 @@ class SocialloginController extends \Rhymix\Modules\Sociallogin\Base
 		// 원래 설정한 비밀번호가 없을 경우 또는 회원가입창으로 넘어가서 정보를 입력 한 경우 해당 password을 새롭게 생성
 		if(!$args->password || !$args->password2)
 		{
-			$args->password = $args->password2 = Rhymix\Framework\Password::getRandomPassword(13);
+			$args->password = $args->password2 = \Rhymix\Framework\Password::getRandomPassword(13);
 		}
 		// 원래 설정한 비밀번호가 잇다면 그 비밀번호를 그대로 사용
 		else
@@ -759,7 +645,7 @@ class SocialloginController extends \Rhymix\Modules\Sociallogin\Base
 	 * @param $value
 	 * @return bool
 	 */
-	public function setDriverAuthData($service, $type, $value)
+	public static function setDriverAuthData($service, $type, $value)
 	{
 		if(!$service)
 		{
@@ -767,7 +653,7 @@ class SocialloginController extends \Rhymix\Modules\Sociallogin\Base
 		}
 		if(!isset($_SESSION['sociallogin_driver_auth'][$service]))
 		{
-			$_SESSION['sociallogin_driver_auth'][$service] = new stdClass();
+			$_SESSION['sociallogin_driver_auth'][$service] = new \stdClass();
 		}
 		if($type == 'token')
 		{
@@ -783,14 +669,5 @@ class SocialloginController extends \Rhymix\Modules\Sociallogin\Base
 			return false;
 		}
 		return true;
-	}
-	
-	public static function clearSession()
-	{
-		unset($_SESSION['sociallogin_driver_auth']);
-		unset($_SESSION['sociallogin_auth']);
-		unset($_SESSION['sociallogin_access_data']);
-		unset($_SESSION['tmp_sociallogin_input_add_info']);
-		unset($_SESSION['sociallogin_current']);
 	}
 }
