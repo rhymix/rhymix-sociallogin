@@ -638,36 +638,4 @@ class Connect extends Base
 		
 		return $args;
 	}
-
-	/**
-	 * @param $service
-	 * @param $type
-	 * @param $value
-	 * @return bool
-	 */
-	public static function setDriverAuthData($service, $type, $value)
-	{
-		if(!$service)
-		{
-			return false;
-		}
-		if(!isset($_SESSION['sociallogin_driver_auth'][$service]))
-		{
-			$_SESSION['sociallogin_driver_auth'][$service] = new \stdClass();
-		}
-		if($type == 'token')
-		{
-			$_SESSION['sociallogin_driver_auth'][$service]->token = $value;
-		}
-		else if ($type == 'profile')
-		{
-			$_SESSION['sociallogin_driver_auth'][$service]->profile = $value;
-		}
-		else
-		{
-			unset($_SESSION['sociallogin_driver_auth'][$service]);
-			return false;
-		}
-		return true;
-	}
 }

@@ -50,7 +50,7 @@ class Discord extends Base
 		$accessValue['access'] = $token['access_token'];
 		$accessValue['refresh'] = $token['refresh_token'];
 		
-		\Rhymix\Modules\Sociallogin\Controllers\Connect::setDriverAuthData('discord', 'token', $accessValue);
+		\Rhymix\Modules\Sociallogin\Base::setDriverAuthData('discord', 'token', $accessValue);
 	}
 
 	/**
@@ -78,7 +78,7 @@ class Discord extends Base
 		$profileValue['user_name'] = $user_info['username'];
 		$profileValue['etc'] = $user_info;
 		
-		\Rhymix\Modules\Sociallogin\Controllers\Connect::setDriverAuthData('discord', 'profile', $profileValue);
+		\Rhymix\Modules\Sociallogin\Base::setDriverAuthData('discord', 'profile', $profileValue);
 	}
 
 	/**

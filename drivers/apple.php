@@ -61,7 +61,7 @@ class Apple extends Base
 		
 		$accessValue['access'] = $token->getToken();
 		
-		\Rhymix\Modules\Sociallogin\Controllers\Connect::setDriverAuthData('apple', 'token', $accessValue);
+		\Rhymix\Modules\Sociallogin\Base::setDriverAuthData('apple', 'token', $accessValue);
 		
 		$this->token = $token;
 		
@@ -112,7 +112,7 @@ class Apple extends Base
 			return new \BaseObject(-1, 'msg_not_confirm_email_sns_for_sns');
 		}
 		
-		\Rhymix\Modules\Sociallogin\Controllers\Connect::setDriverAuthData('apple', 'profile', $profileValue);
+		\Rhymix\Modules\Sociallogin\Base::setDriverAuthData('apple', 'profile', $profileValue);
 
 		return new \BaseObject();
 	}

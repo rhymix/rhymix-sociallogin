@@ -62,7 +62,7 @@ class Github extends Base
 
 		// 토큰 삽입
 		$accessValue['access'] = $token->getToken();
-		\Rhymix\Modules\Sociallogin\Controllers\Connect::setDriverAuthData('github', 'token', $accessValue);
+		\Rhymix\Modules\Sociallogin\Base::setDriverAuthData('github', 'token', $accessValue);
 		
 		unset($_SESSION['socialxe_auth_state']);
 
@@ -106,7 +106,7 @@ class Github extends Base
 		$profileValue['url'] = $profile['html_url'];
 		$profileValue['etc'] = $profile;
 
-		\Rhymix\Modules\Sociallogin\Controllers\Connect::setDriverAuthData('github', 'profile', $profileValue);
+		\Rhymix\Modules\Sociallogin\Base::setDriverAuthData('github', 'profile', $profileValue);
 		
 		return new \BaseObject();
 	}

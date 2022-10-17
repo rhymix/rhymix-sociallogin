@@ -115,7 +115,7 @@ class Twitter extends Base
 		$profileValue['url'] = 'https://twitter.com/' . $profile->screen_name;
 		$profileValue['etc'] = $profile;
 		
-		\Rhymix\Modules\Sociallogin\Controllers\Connect::setDriverAuthData('twitter', 'profile', $profileValue);
+		\Rhymix\Modules\Sociallogin\Base::setDriverAuthData('twitter', 'profile', $profileValue);
 
 		return new \BaseObject();
 	}
@@ -169,7 +169,7 @@ class Twitter extends Base
 		}
 		$accessValue['access'] = $access_token;
 
-		\Rhymix\Modules\Sociallogin\Controllers\Connect::setDriverAuthData('twitter', 'token', $accessValue);
+		\Rhymix\Modules\Sociallogin\Base::setDriverAuthData('twitter', 'token', $accessValue);
 	}
 
 	/**

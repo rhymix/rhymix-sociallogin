@@ -58,7 +58,7 @@ class Google extends Base
 		$accessValue['access'] = $token['access_token'];
 		$accessValue['refresh'] = $token['refresh_token'];
 
-		\Rhymix\Modules\Sociallogin\Controllers\Connect::setDriverAuthData('google', 'token', $accessValue);
+		\Rhymix\Modules\Sociallogin\Base::setDriverAuthData('google', 'token', $accessValue);
 
 		return new \BaseObject();
 	}
@@ -112,7 +112,7 @@ class Google extends Base
 		$profileValue['user_name'] = $profile['names'][0]['displayName'];
 		$profileValue['etc'] = $profile;
 
-		\Rhymix\Modules\Sociallogin\Controllers\Connect::setDriverAuthData('google', 'profile', $profileValue);
+		\Rhymix\Modules\Sociallogin\Base::setDriverAuthData('google', 'profile', $profileValue);
 
 		return new \BaseObject();
 	}
