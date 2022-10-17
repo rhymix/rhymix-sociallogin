@@ -134,7 +134,7 @@ abstract class Base
 
 	public function getSocial()
 	{
-		$serviceAccessData = \SocialloginModel::getAccessData($this->service);
+		$serviceAccessData = \Rhymix\Modules\Sociallogin\Base::getDriverAuthData($this->service);
 		
 		return array(
 			'service' => $this->service,

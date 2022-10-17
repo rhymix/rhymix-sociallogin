@@ -5,8 +5,8 @@ namespace Rhymix\Modules\Sociallogin\Controllers;
 use Context;
 use FileHandler;
 use MemberController;
-use SocialloginModel;
 use Rhymix\Modules\Sociallogin\Base;
+use Rhymix\Modules\Sociallogin\Models\User as UserModel;
 
 class EventHandlers extends Base
 {
@@ -39,7 +39,7 @@ class EventHandlers extends Base
 	public function triggerAfterInsertMember($obj)
 	{
 		$oMemberController = getController('member');
-		$oSocialData = SocialloginModel::getSocialSignUpUserData();
+		$oSocialData = Connect::getSocialSignUpUserData();
 		
 		if(isset($_SESSION['tmp_sociallogin_input_add_info']['profile_dir']))
 		{
@@ -75,7 +75,7 @@ class EventHandlers extends Base
 			}
 
 			// 토큰 넣기
-			$tokenData = SocialloginModel::setAvailableAccessToken($oDriver, $val, false);
+			$tokenData = Connect::setAvailableAccessToken($oDriver, $val, false);
 
 			// 토큰 파기
 			$oDriver->revokeToken($tokenData['access']);
@@ -88,7 +88,7 @@ class EventHandlers extends Base
 		$info->service_id = implode(' | ', $sns_id);
 		$info->nick_name = Context::get('logged_info')->nick_name;
 		$info->member_srl = $obj->member_srl;
-		SocialloginModel::logRecord('delete_member', $info);
+		self::logRecord('delete_member', $info);
 	}
 
 	/**
@@ -101,7 +101,7 @@ class EventHandlers extends Base
 			return;
 		}
 
-		if (!SocialloginModel::memberUserSns($member_srl))
+		if (!UserModel::memberUserSns($member_srl))
 		{
 			return;
 		}
@@ -137,14 +137,14 @@ class EventHandlers extends Base
 			}
 		}
 
-		if (!SocialloginModel::memberUserSns())
+		if (!UserModel::memberUserSns())
 		{
 			return;
 		}
 
 		foreach ($config->sns_services as $key => $val)
 		{
-			if (!($sns_info = SocialloginModel::getMemberSnsByService($val)) || $sns_info->linkage != 'Y')
+			if (!($sns_info = UserModel::getMemberSnsByService($val)) || $sns_info->linkage != 'Y')
 			{
 				continue;
 			}
@@ -155,7 +155,7 @@ class EventHandlers extends Base
 			}
 
 			// 토큰 넣기
-			SocialloginModel::setAvailableAccessToken($oDriver, $sns_info);
+			Connect::setAvailableAccessToken($oDriver, $sns_info);
 
 			$args = new \stdClass;
 			$args->title = $obj->title;
@@ -167,7 +167,7 @@ class EventHandlers extends Base
 			$info = new \stdClass;
 			$info->sns = $val;
 			$info->title = $obj->title;
-			SocialloginModel::logRecord('linkage', $info);
+			self::logRecord('linkage', $info);
 		}
 	}
 }

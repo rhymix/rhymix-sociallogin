@@ -70,7 +70,7 @@ class Apple extends Base
 
 	function getSNSUserInfo()
 	{
-		if (!\SocialloginModel::getAccessData('apple')->token['access'])
+		if (!\Rhymix\Modules\Sociallogin\Base::getDriverAuthData('apple')->token['access'])
 		{
 			return new \BaseObject(-1, 'msg_errer_api_connect');
 		}
@@ -128,7 +128,7 @@ class Apple extends Base
 
 	function getProfileImage()
 	{
-		return \SocialloginModel::getAccessData('apple')->profile['profile_image'];
+		return \Rhymix\Modules\Sociallogin\Base::getDriverAuthData('apple')->profile['profile_image'];
 	}
 
 	function requestAPI($request_url, $post_data = array(), $authorization = null, $delete = false)

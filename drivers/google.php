@@ -70,7 +70,7 @@ class Google extends Base
 	function getSNSUserInfo()
 	{
 		// 토큰 체크
-		$serviceAccessData = \SocialloginModel::getAccessData('google');
+		$serviceAccessData = \Rhymix\Modules\Sociallogin\Base::getDriverAuthData('google');
 		if (!$serviceAccessData->token['access'])
 		{
 			return new \BaseObject(-1, 'msg_errer_api_connect');
@@ -124,7 +124,7 @@ class Google extends Base
 	{
 		// 토큰 체크
 		//TODO (BJRambo): is that access token empty?
-		if (!($token = $access_token ?: \SocialloginModel::getAccessData('google')->token['refresh']))
+		if (!($token = $access_token ?: \Rhymix\Modules\Sociallogin\Base::getDriverAuthData('google')->token['refresh']))
 		{
 			return;
 		}
@@ -151,7 +151,7 @@ class Google extends Base
 
 		// API 요청 : 토큰 새로고침
 		$token = $this->requestAPI('token', array(
-			'refresh_token' => \SocialloginModel::getAccessData('google')->token['refresh'],
+			'refresh_token' => \Rhymix\Modules\Sociallogin\Base::getDriverAuthData('google')->token['refresh'],
 			'grant_type'    => 'refresh_token',
 			'client_id'     => $this->config->google_client_id,
 			'client_secret' => $this->config->google_client_secret,
@@ -170,7 +170,7 @@ class Google extends Base
 	function getProfileExtend()
 	{
 		// 프로필 체크
-		if (!$profile = \SocialloginModel::getAccessData('google')->profile['etc'])
+		if (!$profile = \Rhymix\Modules\Sociallogin\Base::getDriverAuthData('google')->profile['etc'])
 		{
 			return new \stdClass;
 		}

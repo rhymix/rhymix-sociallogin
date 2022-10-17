@@ -77,7 +77,7 @@ class Facebook extends Base
 	function getSNSUserInfo()
 	{
 		// 토큰 체크
-		$serviceAccessData = \SocialloginModel::getAccessData('facebook');
+		$serviceAccessData = \Rhymix\Modules\Sociallogin\Base::getDriverAuthData('facebook');
 		if (!$serviceAccessData->token['access'])
 		{
 			return new \BaseObject(-1, 'msg_errer_api_connect');
@@ -155,7 +155,7 @@ class Facebook extends Base
 
 		// API 요청 : 권한 삭제
 		$this->requestAPI('/me/permissions', array(
-			'access_token' => \SocialloginModel::getAccessData('facebook')->token['access'],
+			'access_token' => \Rhymix\Modules\Sociallogin\Base::getDriverAuthData('facebook')->token['access'],
 		), null, true);
 	}
 
@@ -165,7 +165,7 @@ class Facebook extends Base
 	function getProfileExtend()
 	{
 		// 프로필 체크
-		if (!$profile = \SocialloginModel::getAccessData('facebook')->profile['etc'])
+		if (!$profile = \Rhymix\Modules\Sociallogin\Base::getDriverAuthData('facebook')->profile['etc'])
 		{
 			return new \stdClass;
 		}

@@ -60,7 +60,7 @@ class Discord extends Base
 	function getSNSUserInfo()
 	{
 		// 토큰 체크
-		$token = \SocialloginModel::getAccessData('discord')->token['access'];
+		$token = \Rhymix\Modules\Sociallogin\Base::getDriverAuthData('discord')->token['access'];
 		
 		if (!$token)
 		{
@@ -94,7 +94,7 @@ class Discord extends Base
 
 		// API 요청 : 토큰 새로고침
 		$token = $this->requestAPI('api/oauth2/token', array(
-			'refresh_token' => \SocialloginModel::getAccessData('discord')->token['refresh'],
+			'refresh_token' => \Rhymix\Modules\Sociallogin\Base::getDriverAuthData('discord')->token['refresh'],
 			'grant_type'    => 'refresh_token',
 			'client_id'     => $this->config->discord_client_id,
 			'client_secret' => $this->config->discord_client_secret,

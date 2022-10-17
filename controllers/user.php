@@ -6,11 +6,12 @@ use Context;
 use MemberController;
 use MemberModel;
 use Mobile;
-use SocialloginModel;
 use Rhymix\Framework\Exceptions\InvalidRequest;
 use Rhymix\Framework\Exception;
 use Rhymix\Framework\Session;
 use Rhymix\Modules\Sociallogin\Base;
+use Rhymix\Modules\Sociallogin\Models\Config as ConfigModel;
+use Rhymix\Modules\Sociallogin\Models\User as UserModel;
 
 class User extends Base
 {
@@ -46,7 +47,7 @@ class User extends Base
 		foreach (self::getConfig()->sns_services as $key => $val)
 		{
 			$args = new \stdClass;
-			$sns_info = SocialloginModel::getMemberSnsByService($val);
+			$sns_info = UserModel::getMemberSnsByService($val);
 			
 			if ($sns_info->name)
 			{
@@ -55,7 +56,7 @@ class User extends Base
 			}
 			else
 			{
-				$args->auth_url = SocialloginModel::snsAuthUrl($val, 'register');
+				$args->auth_url = ConfigModel::getAuthUrl($val, 'register');
 				$args->sns_status = Context::getLang('status_sns_no_register');
 			}
 
@@ -138,7 +139,7 @@ class User extends Base
 		$info = new \stdClass;
 		$info->sns = $service;
 		$info->type = $type;
-		SocialloginModel::logRecord($this->act, $info);
+		self::logRecord($this->act, $info);
 	}
 
 	/**
@@ -165,7 +166,7 @@ class User extends Base
 
 		foreach (self::getConfig()->sns_services as $key => $val)
 		{
-			if (!($sns_info = SocialloginModel::getMemberSnsByService($val, $member_info->member_srl)) || !$sns_info->name)
+			if (!($sns_info = UserModel::getMemberSnsByService($val, $member_info->member_srl)) || !$sns_info->name)
 			{
 				continue;
 			}
@@ -203,13 +204,13 @@ class User extends Base
 			throw new InvalidRequest;
 		}
 
-		if (!($sns_info = SocialloginModel::getMemberSnsByService($service)) || !$sns_info->name)
+		if (!($sns_info = UserModel::getMemberSnsByService($service)) || !$sns_info->name)
 		{
 			throw new Exception('msg_not_linkage_sns_info');
 		}
 
 		// 토큰 넣기
-		$tokenData = SocialloginModel::setAvailableAccessToken($oDriver, $sns_info);
+		$tokenData = Connect::setAvailableAccessToken($oDriver, $sns_info);
 
 		// 연동 체크
 		if (($check = $oDriver->checkLinkage()) && $check instanceof Object && !$check->toBool() && $sns_info->linkage != 'Y')
@@ -232,7 +233,7 @@ class User extends Base
 		$info = new \stdClass;
 		$info->sns = $service;
 		$info->linkage = $args->linkage;
-		SocialloginModel::logRecord($this->act, $info);
+		self::logRecord($this->act, $info);
 
 		$this->setMessage('msg_success_linkage_sns');
 
@@ -259,7 +260,7 @@ class User extends Base
 			throw new InvalidRequest;
 		}
 
-		if (!($sns_info = SocialloginModel::getMemberSnsByService($service)) || !$sns_info->name)
+		if (!($sns_info = UserModel::getMemberSnsByService($service)) || !$sns_info->name)
 		{
 			throw new InvalidRequest;
 		}
@@ -267,7 +268,7 @@ class User extends Base
 		if (self::getConfig()->sns_login == 'Y' && self::getConfig()->default_signup != 'Y')
 		{
 			// TODO(BJRambo) : check get to list;
-			$sns_list = SocialloginModel::getMemberSnsList();
+			$sns_list = UserModel::getMemberSnsList();
 
 			if (!is_array($sns_list))
 			{
@@ -291,7 +292,7 @@ class User extends Base
 		}
 
 		// 토큰 넣기
-		$tokenData = SocialloginModel::setAvailableAccessToken($oDriver, $sns_info, false);
+		$tokenData = Connect::setAvailableAccessToken($oDriver, $sns_info, false);
 
 		// 토큰 파기
 		$oDriver->revokeToken($tokenData['access']);
@@ -299,7 +300,7 @@ class User extends Base
 		// 로그 기록
 		$info = new \stdClass;
 		$info->sns = $service;
-		SocialloginModel::logRecord($this->act, $info);
+		self::logRecord($this->act, $info);
 
 		$this->setMessage('msg_success_sns_register_clear');
 

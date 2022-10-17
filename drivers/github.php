@@ -71,7 +71,7 @@ class Github extends Base
 
 	function getSNSUserInfo()
 	{
-		if (!\SocialloginModel::getAccessData('github')->token['access'])
+		if (!\Rhymix\Modules\Sociallogin\Base::getDriverAuthData('github')->token['access'])
 		{
 			return new \BaseObject(-1, 'msg_errer_api_connect');
 		}
@@ -122,7 +122,7 @@ class Github extends Base
 
 	function getProfileImage()
 	{
-		return \SocialloginModel::getAccessData('github')->profile['profile_image'];
+		return \Rhymix\Modules\Sociallogin\Base::getDriverAuthData('github')->profile['profile_image'];
 	}
 
 	function requestAPI($request_url, $post_data = array(), $authorization = null, $delete = false)

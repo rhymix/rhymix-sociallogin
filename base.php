@@ -2,6 +2,9 @@
 
 namespace Rhymix\Modules\Sociallogin;
 
+use Context;
+use ModuleModel;
+
 class Base extends \ModuleObject
 {
 	public static $config = null;
@@ -21,7 +24,7 @@ class Base extends \ModuleObject
 	{
 		if(self::$config === null)
 		{
-			$config = getModel('module')->getModuleConfig('sociallogin') ?: new \stdClass();
+			$config = ModuleModel::getModuleConfig('sociallogin') ?: new \stdClass();
 			
 			if (!$config->delete_auto_log_record)
 			{
@@ -63,16 +66,25 @@ class Base extends \ModuleObject
 
 		return self::$config;
 	}
-
+	
 	/**
 	 * Get Library for sns 
 	 * @param $driver_name
-	 * @return \Rhymix\Modules\Sociallogin\Drivers\Base
+	 * @return Drivers\Base
 	 */
-	public static function getDriver(string $driver_name): \Rhymix\Modules\Sociallogin\Drivers\Base
+	public static function getDriver(string $driver_name): Drivers\Base
 	{
 		$class_name = '\\Rhymix\\Modules\\Sociallogin\\Drivers\\' . ucfirst($driver_name);
 		return $class_name::getInstance();
+	}
+	
+	/**
+	 * @param service
+	 * @return mixed
+	 */
+	public static function getDriverAuthData($service)
+	{
+		return $_SESSION['sociallogin_driver_auth'][$service] ?? null;
 	}
 
 	/**
@@ -117,5 +129,88 @@ class Base extends \ModuleObject
 		unset($_SESSION['sociallogin_access_data']);
 		unset($_SESSION['tmp_sociallogin_input_add_info']);
 		unset($_SESSION['sociallogin_current']);
+	}
+
+	/**
+	 * @brief 로그기록
+	 **/
+	public static function logRecord($act, $info = null)
+	{
+		if (!is_object($info))
+		{
+			$info = Context::getRequestVars();
+		}
+
+		$args = new \stdClass;
+
+		switch ($act)
+		{
+			case 'procSocialloginSnsClear' :
+				$args->category = 'sns_clear';
+				$args->content = sprintf(lang('sns_connect_clear'), $info->sns);
+				break;
+
+			case 'procSocialloginSnsLinkage' :
+				$args->category = 'linkage';
+				$args->content = sprintf(lang('sns_connect_linkage'), $info->sns, $info->linkage);
+				break;
+
+			case 'dispSocialloginConnectSns' :
+				$args->category = 'auth_request';
+				$args->content = sprintf(lang('sns_connect_auth_request'), $info->sns);
+				break;
+
+			case 'procSocialloginCallback' :
+				$args->category = $info->type;
+
+				
+				if ($info->type == 'register')
+				{
+					$info->msg = $info->msg ?: lang('sns_connect_register_success');
+					$args->content = sprintf(lang('sns_connect_exec_register'), $info->sns, Context::getLang($info->msg));
+				}
+				else if ($info->type == 'login')
+				{
+					$info->msg = $info->msg ?: lang('sns_connect_login_success');
+					$args->content = sprintf(lang('sns_connect_exec_login'), $info->sns, Context::getLang($info->msg));
+				}
+				else
+				{
+					//TODO(BJRambo): Add to log for recheck
+				}
+
+				break;
+				
+			case 'linkage' :
+				$args->category = 'linkage';
+				$args->content = sprintf(lang('sns_connect_document'), $info->sns, $info->title);
+				break;
+
+			case 'delete_member' :
+				$args->category = 'delete_member';
+
+				if ($info->nick_name)
+				{
+					$args->content = sprintf(lang('sns_connect_delete_member'), $info->member_srl, $info->nick_name, $info->service_id);
+				}
+				else
+				{
+					$args->content = sprintf(lang('sns_connect_auto_delete_member'), $info->member_srl, $info->nick_name, $info->service_id);
+				}
+
+				break;
+		}
+
+		if (!$args->category)
+		{
+			$args->category = 'unknown';
+			$args->content = sprintf('%s (act : %s)', Context::getLang('unknown'), $act);
+		}
+
+		$args->act = $act;
+		$args->micro_time = microtime(true);
+		$args->member_srl = Context::get('logged_info')->member_srl;
+
+		executeQuery('sociallogin.insertLogRecord', $args);
 	}
 }

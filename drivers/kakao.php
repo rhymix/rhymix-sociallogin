@@ -61,7 +61,7 @@ class Kakao extends Base
 	function getSNSUserInfo()
 	{
 		// 토큰 체크
-		$serviceAccessData = \SocialloginModel::getAccessData('kakao');
+		$serviceAccessData = \Rhymix\Modules\Sociallogin\Base::getDriverAuthData('kakao');
 		if (!$serviceAccessData->token['access'])
 		{
 			return new \BaseObject(-1, 'msg_errer_api_connect');
@@ -134,7 +134,7 @@ class Kakao extends Base
 
 		// API 요청 : 토큰 새로고침
 		$token = $this->requestAPI('token', [
-			'refresh_token' => \SocialloginModel::getAccessData('kakao')->token['refresh'],
+			'refresh_token' => \Rhymix\Modules\Sociallogin\Base::getDriverAuthData('kakao')->token['refresh'],
 			'grant_type'    => 'refresh_token',
 			'client_id'     => $this->config->kakao_client_id,
 		]);
@@ -158,7 +158,7 @@ class Kakao extends Base
 	function checkLinkage()
 	{
 		// API 요청 : 카카오 스토리 사용자 여부
-		if (!\SocialloginModel::getAccessData('kakao')->token['access'] || !$user = $this->requestAPI('v1/api/story/isstoryuser', [], \SocialloginModel::getAccessData('kakao')->token['access']))
+		if (!\Rhymix\Modules\Sociallogin\Base::getDriverAuthData('kakao')->token['access'] || !$user = $this->requestAPI('v1/api/story/isstoryuser', [], \Rhymix\Modules\Sociallogin\Base::getDriverAuthData('kakao')->token['access']))
 		{
 			return new \BaseObject(-1, 'msg_errer_api_connect');
 		}
@@ -177,16 +177,16 @@ class Kakao extends Base
 	 */
 	function post($args)
 	{
-		$serviceAccessData = \SocialloginModel::getAccessData('kakao');
+		$serviceAccessData = \Rhymix\Modules\Sociallogin\Base::getDriverAuthData('kakao');
 		
 		// 토큰 체크
-		if (!\SocialloginModel::getAccessData('kakao')->token['access'])
+		if (!\Rhymix\Modules\Sociallogin\Base::getDriverAuthData('kakao')->token['access'])
 		{
 			return;
 		}
 
 		// API 요청 : 스토리에 포스팅 (제목 + 게시물 URL)
-		$this->requestAPI('v1/api/story/post/note', ['content' => $args->title . ' ' . $args->url], \SocialloginModel::getAccessData('kakao')->token['access']);
+		$this->requestAPI('v1/api/story/post/note', ['content' => $args->title . ' ' . $args->url], \Rhymix\Modules\Sociallogin\Base::getDriverAuthData('kakao')->token['access']);
 	}
 
 	/**
@@ -195,7 +195,7 @@ class Kakao extends Base
 	function getProfileExtend()
 	{
 		// 프로필 체크
-		if (!$profile = \SocialloginModel::getAccessData('kakao')->profile['etc'])
+		if (!$profile = \Rhymix\Modules\Sociallogin\Base::getDriverAuthData('kakao')->profile['etc'])
 		{
 			return new \stdClass;
 		}
@@ -214,7 +214,7 @@ class Kakao extends Base
 	function getProfileImage()
 	{
 		// 최대한 큰 사이즈의 프로필 이미지를 반환하기 위하여
-		return preg_replace('/\?.*/', '', \SocialloginModel::getAccessData('kakao')->profile['profile_image']);
+		return preg_replace('/\?.*/', '', \Rhymix\Modules\Sociallogin\Base::getDriverAuthData('kakao')->profile['profile_image']);
 	}
 
 	function requestAPI($url, $post = [], $authorization = null, $delete = null)

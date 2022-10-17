@@ -8,10 +8,11 @@ use FileHandler;
 use MemberController;
 use MemberModel;
 use PointController;
-use SocialloginModel;
 use Rhymix\Framework\Exceptions\InvalidRequest;
 use Rhymix\Framework\Exception;
 use Rhymix\Modules\Sociallogin\Base;
+use Rhymix\Modules\Sociallogin\Models\Config as ConfigModel;
+use Rhymix\Modules\Sociallogin\Models\User as UserModel;
 
 class Connect extends Base
 {
@@ -65,7 +66,7 @@ class Connect extends Base
 			{
 				$error = $output->getMessage();
 				// 오류시 토큰 파기 (롤백)
-				$oDriver->revokeToken(SocialloginModel::getAccessData($service)->token['access']);
+				$oDriver->revokeToken(self::getDriverAuthData($service)->token['access']);
 			}
 		}
 		
@@ -118,7 +119,7 @@ class Connect extends Base
 		$info->msg = $msg;
 		$info->type = $type;
 		$info->sns = $service;
-		SocialloginModel::logRecord($this->act, $info);
+		self::logRecord($this->act, $info);
 		
 		// 오류
 		if ($error)
@@ -165,7 +166,7 @@ class Connect extends Base
 
 		$service = $oDriver->getService();
 
-		$serviceAccessData = SocialloginModel::getAccessData($service);
+		$serviceAccessData = self::getDriverAuthData($service);
 		$id = $serviceAccessData->profile['sns_id'];
 		if (!$id)
 		{
@@ -173,7 +174,7 @@ class Connect extends Base
 		}
 		
 		// SNS ID 조회
-		if (($sns_info = SocialloginModel::getMemberSnsById($id, $service)) && $sns_info->member_srl)
+		if (($sns_info = UserModel::getMemberSnsById($id, $service)) && $sns_info->member_srl)
 		{
 			throw new Exception('msg_already_registed_sns');
 		}
@@ -344,7 +345,7 @@ class Connect extends Base
 			}
 
 			// 이전 로그인 기록이 있으면 가입 포인트 제거
-			if (SocialloginModel::getSnsUser($id, $service))
+			if (UserModel::getSnsUser($id, $service))
 			{
 				Context::set('__point_message__', Context::getLang('PHC_member_register_sns_login'));
 
@@ -361,7 +362,7 @@ class Connect extends Base
 		else
 		{
 			// 등록하려는 서비스가 이미 등록되어 있을 경우
-			if (($sns_info = SocialloginModel::getMemberSnsByService($service, $member_srl)) && $sns_info->member_srl)
+			if (($sns_info = UserModel::getMemberSnsByService($service, $member_srl)) && $sns_info->member_srl)
 			{
 				// 로그인에서 등록 요청이 온 경우 SNS 정보 삭제 후 재등록 (SNS ID가 달라졌다고 판단)
 				if ($login)
@@ -404,7 +405,7 @@ class Connect extends Base
 		}
 
 		// SNS ID 기록 (SNS 정보가 삭제 되더라도 ID는 영구 보관)
-		if (!SocialloginModel::getSnsUser($id, $service))
+		if (!UserModel::getSnsUser($id, $service))
 		{
 			$output = executeQuery('sociallogin.insertSnsUser', $args);
 			if (!$output->toBool())
@@ -434,7 +435,7 @@ class Connect extends Base
 		$return_output = executeQuery('sociallogin.insertMemberSns', $oAuthArgs);
 
 		// SNS ID 기록 (SNS 정보가 삭제 되더라도 ID는 영구 보관)
-		if (!SocialloginModel::getSnsUser($oAuthArgs->service_id, $oAuthArgs->service))
+		if (!UserModel::getSnsUser($oAuthArgs->service_id, $oAuthArgs->service))
 		{
 			$output = executeQuery('sociallogin.insertSnsUser', $oAuthArgs);
 		}
@@ -458,7 +459,7 @@ class Connect extends Base
 		}
 		
 		$service = $oDriver->getService();
-		$serviceAccessData = SocialloginModel::getAccessData($service);
+		$serviceAccessData = self::getDriverAuthData($service);
 		if (!$serviceAccessData->profile['sns_id'])
 		{
 			throw new Exception('msg_errer_api_connect');
@@ -466,7 +467,7 @@ class Connect extends Base
 
 		// SNS ID로 회원 검색
 		$do_login = false;
-		if (($sns_info = SocialloginModel::getMemberSnsById($serviceAccessData->profile['sns_id'], $service)) && $sns_info->member_srl)
+		if (($sns_info = UserModel::getMemberSnsById($serviceAccessData->profile['sns_id'], $service)) && $sns_info->member_srl)
 		{
 			// 탈퇴한 회원이면 삭제후 등록 시도
 			if (!($member_info = MemberModel::getMemberInfoByMemberSrl($sns_info->member_srl)) || !$member_info->member_srl)
@@ -574,7 +575,7 @@ class Connect extends Base
 		}
 
 		$service = $oDriver->getService();
-		$serviceAccessData = SocialloginModel::getAccessData($service);
+		$serviceAccessData = self::getDriverAuthData($service);
 		if (!$serviceAccessData->profile['sns_id'])
 		{
 			throw new Exception('msg_errer_api_connect');
@@ -582,7 +583,7 @@ class Connect extends Base
 
 		// SNS ID로 회원 검색
 		$isCheck = false;
-		if (($sns_info = SocialloginModel::getMemberSnsById($serviceAccessData->profile['sns_id'], $service)) && $sns_info->member_srl)
+		if (($sns_info = UserModel::getMemberSnsById($serviceAccessData->profile['sns_id'], $service)) && $sns_info->member_srl)
 		{
 			if($sns_info->service_id == $serviceAccessData->profile['sns_id'])
 			{
@@ -615,7 +616,7 @@ class Connect extends Base
 	 */
 	public function replaceSignUpFormBySocial($args)
 	{
-		$socialLoginUserData = SocialloginModel::getSocialSignUpUserData();
+		$socialLoginUserData = self::getSocialSignUpUserData();
 
 		if($socialLoginUserData)
 		{
@@ -637,5 +638,64 @@ class Connect extends Base
 		}
 		
 		return $args;
+	}
+	
+	/**
+	 * 소셜 로그인에 필요한 정보를 세션에서 가져옴
+	 * @return false|stdClass
+	 */
+	public static function getSocialSignUpUserData()
+	{
+		if(isset($_SESSION['tmp_sociallogin_input_add_info']))
+		{
+			$return_object = new \stdClass();
+			$return_object->nick_name = $_SESSION['tmp_sociallogin_input_add_info']['nick_name'];
+			$return_object->email_address = $_SESSION['tmp_sociallogin_input_add_info']['email_address'];
+			
+			return $return_object;
+		}
+		else
+		{
+			return false;
+		}
+	}
+	
+	/**
+	 * @param $oDriver \Rhymix\Modules\Sociallogin\Drivers\Base
+	 * @param $sns_info
+	 * @param bool $db
+	 */
+	public static function setAvailableAccessToken($oDriver, $sns_info, $db = true)
+	{
+		// 새로고침 토큰이 없을 경우 그대로 넣기
+		if (!$sns_info->refresh_token)
+		{
+			$tokenData = [];
+			$tokenData['access'] = $sns_info->access_token;
+
+			return $tokenData;
+		}
+
+		// 토큰 새로고침
+		$tokenData = $oDriver->refreshToken($sns_info->refresh_token);
+
+		// [실패] 이전 토큰 그대로 넣기
+		if (!$tokenData['access'])
+		{
+			$tokenData['access'] = $sns_info->access_token;
+		}
+		// [성공] 새로고침된 토큰을 DB에 저장
+		else if ($db)
+		{
+			$args = new \stdClass;
+			$args->refresh_token = $tokenData['access'];
+			$args->access_token = $tokenData['refresh'];
+			$args->service = $oDriver->getService();
+			$args->member_srl = $sns_info->member_srl;
+
+			executeQuery('sociallogin.updateMemberSns', $args);
+		}
+		
+		return $tokenData;
 	}
 }
