@@ -7,6 +7,7 @@ $lang->cmd_environment_setting = '환경설정';
 $lang->cmd_log_record = '로그기록';
 $lang->sns_list = 'SNS목록';
 $lang->msg_not_exist_data = '데이터가 존재하지 않습니다.';
+$lang->msg_not_exist_type = '타입이 지정되지 않았습니다.';
 $lang->delete_auto_log_record = '로그기록 자동삭제';
 $lang->about_delete_auto_log_record = '해당일 이전의 로그기록은 자동삭제됩니다. (단, 0일이면 자동삭제를 하지않습니다.)<br>지정하지 않으면 로그가 많이 쌓여서 DB에 부담을 줄 수 있으니, 가능하다면 30일 이하로 설정하시는 것이 좋습니다.';
 $lang->all_delete_log_record = '모든 로그기록 삭제';

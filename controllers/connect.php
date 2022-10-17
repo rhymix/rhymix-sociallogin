@@ -73,44 +73,46 @@ class Connect extends Base
 		// 등록 처리
 		if (!$error)
 		{
-			if ($type == 'register')
+			switch($type)
 			{
-				$msg = 'msg_success_sns_register';
-
-				$output = $this->registerSns($oDriver);
-				if (!$output->toBool())
-				{
-					$error = $output->getMessage();
-				}
-			}
-			else if ($type == 'login')
-			{
-				$output = $this->loginSns($oDriver);
-				if (!$output->toBool())
-				{
-					$error = $output->getMessage();
-				}
-
-				// 로그인 후 페이지 이동 (회원 설정 참조)
-				$redirect_url = getModel('module')->getModuleConfig('member')->after_login_url ?: getNotEncodedUrl('', 'mid', $_SESSION['sociallogin_current']['mid'], 'act', '');
-			}
-			else if ($type == 'recheck')
-			{
-				$recheckBool = $this->reCheckSns($oDriver, $type);
-				if(!$recheckBool)
-				{
-					$error = lang('sociallogin.msg_invalid_sns_account');
-				}
-				$redirect_url = getNotEncodedUrl('', 'mid', Context::get('mid'), 'act', 'dispMemberModifyInfo');
-			}
-			else if ($type == 'modify_password')
-			{
-				$recheckBool = $this->reCheckSns($oDriver, $type);
-				if(!$recheckBool)
-				{
-					$error = lang('sociallogin.msg_invalid_sns_account');
-				}
-				$redirect_url = getNotEncodedUrl('', 'mid', Context::get('mid'), 'act', 'dispMemberModifyPassword');
+				case 'register':
+					$msg = 'msg_success_sns_register';
+					
+					$output = $this->registerSns($oDriver);
+					if (!$output->toBool())
+					{
+						$error = $output->getMessage();
+					}
+					break;
+				case 'login':
+					$output = $this->loginSns($oDriver);
+					if (!$output->toBool())
+					{
+						$error = $output->getMessage();
+					}
+					
+					// 로그인 후 페이지 이동 (회원 설정 참조)
+					$redirect_url = getModel('module')->getModuleConfig('member')->after_login_url ?: getNotEncodedUrl('', 'mid', $_SESSION['sociallogin_current']['mid'], 'act', '');
+					break;
+				case 'recheck':
+					$recheckBool = $this->reCheckSns($oDriver, $type);
+					if(!$recheckBool)
+					{
+						$error = lang('sociallogin.msg_invalid_sns_account');
+					}
+					$redirect_url = getNotEncodedUrl('', 'mid', Context::get('mid'), 'act', 'dispMemberModifyInfo');
+					break;
+				case 'modify_password':
+					$recheckBool = $this->reCheckSns($oDriver, $type);
+					if(!$recheckBool)
+					{
+						$error = lang('sociallogin.msg_invalid_sns_account');
+					}
+					$redirect_url = getNotEncodedUrl('', 'mid', Context::get('mid'), 'act', 'dispMemberModifyPassword');
+					break;
+				default:
+					$error = lang('sociallogin.msg_not_exist_type');
+					break;
 			}
 		}
 
