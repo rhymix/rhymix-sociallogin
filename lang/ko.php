@@ -51,6 +51,7 @@ $lang->profile = '프로필';
 $lang->profile_name = 'SNS 프로필 닉네임';
 $lang->sns_service = '서비스';
 $lang->about_sns_profile = '회원 팝업메뉴에 SNS 프로필를 추가합니다.';
+$lang->about_sns_manage = '회원 메뉴에 SNS 관리를 추가합니다.';
 $lang->register = '등록';
 $lang->login = '로그인';
 $lang->unknown = '알 수 없음';
