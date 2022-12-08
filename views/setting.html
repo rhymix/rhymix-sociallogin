@@ -35,6 +35,14 @@
 				</label>
 			</div>
 		</div>
+		<div class="x_control-group">
+			<label class="x_control-label" for="sns_manage">{$lang->sns_manage}</label>
+			<div class="x_controls">
+				<label class="x_inline" for="sns_manage">
+					<input type="checkbox" name="sns_manage" id="sns_manage" value="Y" checked="checked"|cond="$config->sns_manage=='Y'" /> {$lang->about_sns_manage}
+				</label>
+			</div>
+		</div>
 	</section>
 	<section class="section">
 		<h1>{$lang->cmd_set_design_info}</h1>

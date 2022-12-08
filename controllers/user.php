@@ -39,6 +39,11 @@ class User extends Base
 	 */
 	public function dispSocialloginSnsManage()
 	{
+		if (self::getConfig()->sns_manage !== 'Y')
+		{
+			throw new InvalidRequest;
+		}
+
 		if (!Context::get('is_logged'))
 		{
 			throw new Exception('msg_not_logged');

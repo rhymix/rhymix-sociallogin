@@ -15,7 +15,7 @@ class EventHandlers extends Base
 	 */
 	public function triggerAfterModuleObject()
 	{
-		if ($this->user->isMember())
+		if ($this->user->isMember() && self::getConfig()->sns_manage === 'Y')
 		{
 			MemberController::getInstance()->addMemberMenu('dispSocialloginSnsManage', 'sns_manage');
 		}

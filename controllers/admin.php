@@ -211,6 +211,7 @@ class Admin extends Base
 			'delete_auto_log_record',
 			'sns_services',
 			'sns_profile',
+			'sns_manage',
 			'layout_srl',
 			'skin',
 			'mlayout_srl',
