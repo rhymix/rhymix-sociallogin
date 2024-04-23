@@ -88,28 +88,28 @@ class Admin extends Base
 		$search_option = array('nick_name', getModel('module')->getModuleConfig('member')->identifier);
 		Context::set('search_option', $search_option);
 
-		
+
 		$args = new \stdClass;
 
 		if (($search_target = trim(Context::get('search_target'))) && in_array($search_target, $search_option))
 		{
 			$args->$search_target = str_replace(' ', '%', trim(Context::get('search_keyword')));
 		}
-		
+
 		if(Context::get('member_srl'))
 		{
 			$args->member_srl = Context::get('member_srl');
 		}
-		
+
 		if(Context::get('service'))
 		{
 			$args->service = Context::get('service');
 		}
-		
+
 		$args->page = Context::get('page');
-		
+
 		$output = executeQuery('sociallogin.getMemberSnsList', $args);
-		
+
 		Context::set('total_count', $output->page_navigation->total_count);
 		Context::set('total_page', $output->page_navigation->total_page);
 		Context::set('page', $output->page);
@@ -118,7 +118,7 @@ class Admin extends Base
 
 		$this->setTemplateFile('sns_list');
 	}
-	
+
 	function dispSocialloginAdminMigration()
 	{
 		$oDB = DB::getInstance();
@@ -149,6 +149,9 @@ class Admin extends Base
 			'apple_client_id',
 			'apple_team_id',
 			'apple_file_key',
+			'tiktok_app_id',
+			'tiktok_client_key',
+			'tiktok_client_secret',
 		);
 
 		$config = self::getConfig();
@@ -159,11 +162,11 @@ class Admin extends Base
 		}
 
 		$securityFile = self::_getAppleSecurityFile();
-		
+
 		if(is_uploaded_file($args->apple_file['tmp_name']))
 		{
 			$random = \Rhymix\Framework\Security::getRandom();
-			
+
 			$file_dir = RX_BASEDIR . 'files/social/apple/';
 			if(!FileHandler::isDir($file_dir))
 			{
@@ -179,7 +182,7 @@ class Admin extends Base
 				{
 					FileHandler::removeFile($config->apple_file_path);
 				}
-				
+
 				$config->apple_file_path = $fileName;
 			}
 		}
@@ -195,9 +198,9 @@ class Admin extends Base
 				}
 			}
 		}
-		
+
 		getController('module')->insertModuleConfig('sociallogin', $config);
-		
+
 		$this->setMessage('success_updated');
 
 		$this->setRedirectUrl(getNotEncodedUrl('', 'module', 'admin', 'act', 'dispSocialloginAdminSettingApi'));
@@ -241,7 +244,7 @@ class Admin extends Base
 		{
 			$config->sns_services = array();
 		}
-		
+
 		getController('module')->insertModuleConfig('sociallogin', $config);
 
 		$this->setMessage('success_updated');
@@ -268,7 +271,7 @@ class Admin extends Base
 
 		$this->setRedirectUrl(getNotEncodedUrl('', 'module', 'admin', 'act', 'dispSocialloginAdminLogRecord'));
 	}
-	
+
 	function procSocialloginAdminMigration()
 	{
 		$oDB = DB::getInstance();
@@ -287,11 +290,11 @@ class Admin extends Base
 			SELECT `member_srl`, `service`, `id`, `name`, `email`,`profile_image`, `profile_url`, `profile_info`, `access_token`, `refresh_token`, `linkage`, `regdate`
 			FROM socialxe';
 		$oDB->query($source);
-		
+
 		$this->setMessage('success_updated');
 		$this->setRedirectUrl(getNotEncodedUrl('', 'module', 'admin', 'act', 'dispSocialloginAdminMigration'));
 	}
-	
+
 	/**
 	 * 애플 보안 설정 파일의 위치를 가져옵니다.
 	 * @return false|string
@@ -299,7 +302,7 @@ class Admin extends Base
 	protected static function _getAppleSecurityFile()
 	{
 		$config = self::getConfig();
-		
+
 		if(!\Rhymix\Framework\Session::isAdmin())
 		{
 			return false;
@@ -309,7 +312,7 @@ class Admin extends Base
 		{
 			return $config->apple_file_path;
 		}
-		
+
 		return false;
 	}
 }

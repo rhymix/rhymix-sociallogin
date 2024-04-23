@@ -18,14 +18,15 @@ class Base extends \ModuleObject
 		'discord',
 		'github',
 		'apple',
+		'tiktok',
 	);
-	
+
 	public static function getConfig()
 	{
 		if(self::$config === null)
 		{
 			$config = ModuleModel::getModuleConfig('sociallogin') ?: new \stdClass();
-			
+
 			if (!$config->delete_auto_log_record)
 			{
 				$config->delete_auto_log_record = 0;
@@ -60,15 +61,15 @@ class Base extends \ModuleObject
 			{
 				$config->sns_input_add_info = [];
 			}
-			
+
 			self::$config = $config;
 		}
 
 		return self::$config;
 	}
-	
+
 	/**
-	 * Get Library for sns 
+	 * Get Library for sns
 	 * @param $driver_name
 	 * @return Drivers\Base
 	 */
@@ -77,7 +78,7 @@ class Base extends \ModuleObject
 		$class_name = '\\Rhymix\\Modules\\Sociallogin\\Drivers\\' . ucfirst($driver_name);
 		return $class_name::getInstance();
 	}
-	
+
 	/**
 	 * @param service
 	 * @return mixed
@@ -118,7 +119,7 @@ class Base extends \ModuleObject
 		}
 		return true;
 	}
-	
+
 	/**
 	 * Clear session info
 	 */
@@ -163,7 +164,7 @@ class Base extends \ModuleObject
 			case 'procSocialloginCallback' :
 				$args->category = $info->type;
 
-				
+
 				if ($info->type == 'register')
 				{
 					$info->msg = $info->msg ?: lang('sns_connect_register_success');
@@ -180,7 +181,7 @@ class Base extends \ModuleObject
 				}
 
 				break;
-				
+
 			case 'linkage' :
 				$args->category = 'linkage';
 				$args->content = sprintf(lang('sns_connect_document'), $info->sns, $info->title);

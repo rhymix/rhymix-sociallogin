@@ -53,7 +53,7 @@ class User extends Base
 		{
 			$args = new \stdClass;
 			$sns_info = UserModel::getMemberSnsByService($val);
-			
+
 			if ($sns_info->name)
 			{
 				$args->register = true;
@@ -84,7 +84,7 @@ class User extends Base
 		{
 			throw new InvalidRequest;
 		}
-		
+
 		$service = Context::get('service');
 		if (!$service || !in_array($service, self::getConfig()->sns_services))
 		{
@@ -94,7 +94,7 @@ class User extends Base
 		{
 			throw new InvalidRequest;
 		}
-		
+
 		if (!$type = Context::get('type'))
 		{
 			throw new InvalidRequest;
@@ -108,7 +108,6 @@ class User extends Base
 		{
 			throw new Exception('already_logged');
 		}
-
 		// 인증 메일 유효 시간
 		if (self::getConfig()->mail_auth_valid_hour)
 		{
@@ -188,7 +187,7 @@ class User extends Base
 
 		$this->setTemplateFile('sns_profile');
 	}
-	
+
 	/**
 	 * @brief SNS 연결
 	 **/
@@ -244,7 +243,7 @@ class User extends Base
 
 		$this->setRedirectUrl(getNotEncodedUrl('', 'mid', Context::get('mid'), 'act', 'dispSocialloginSnsManage'));
 	}
-	
+
 	/**
 	 * SNS 연결 해제
 	 */
