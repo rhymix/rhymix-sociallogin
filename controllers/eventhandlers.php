@@ -15,7 +15,7 @@ class EventHandlers extends Base
 	 */
 	public function triggerAfterModuleObject()
 	{
-		if ($this->user->isMember() && self::getConfig()->sns_manage === 'Y')
+		if ($this->user->isMember() && (self::getConfig()->sns_manage ?? '') === 'Y')
 		{
 			MemberController::getInstance()->addMemberMenu('dispSocialloginSnsManage', 'sns_manage');
 		}
@@ -32,7 +32,7 @@ class EventHandlers extends Base
 			$config->enable_confirm = 'N';
 		}
 	}
-	
+
 	/**
 	 * Trigger after inserting new member.
 	 */
@@ -40,7 +40,7 @@ class EventHandlers extends Base
 	{
 		$oMemberController = getController('member');
 		$oSocialData = Connect::getSocialSignUpUserData();
-		
+
 		if(isset($_SESSION['tmp_sociallogin_input_add_info']['profile_dir']))
 		{
 			$oMemberController->insertProfileImage($obj->member_srl, $_SESSION['tmp_sociallogin_input_add_info']['profile_dir']);
@@ -115,12 +115,12 @@ class EventHandlers extends Base
 	public function triggerAfterInsertDocument($obj)
 	{
 		$config = self::getConfig();
-		
+
 		if($config->sns_share_on_write !== 'Y')
 		{
 			return;
 		}
-		
+
 		if (!$this->user->isMember())
 		{
 			return;
