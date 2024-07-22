@@ -4,7 +4,7 @@ namespace Rhymix\Modules\Sociallogin\Drivers;
 
 class Facebook extends Base
 {
-	const FACEBOOK_GRAPH_API_VERSION = 'v2.8';
+	const FACEBOOK_GRAPH_API_VERSION = 'v19.0';
 	const FACEBOOK_URI = 'https://www.facebook.com/';
 	const FACEBOOK_GRAPH_URL = 'https://graph.facebook.com/';
 	
@@ -128,7 +128,7 @@ class Facebook extends Base
 		}
 		else
 		{
-			return new \BaseObject(-1, 'msg_not_confirm_email_sns_for_sns');
+			//return new \BaseObject(-1, 'msg_not_confirm_email_sns_for_sns');
 		}
 
 		// ID, 이름, 프로필 이미지, 프로필 URL
