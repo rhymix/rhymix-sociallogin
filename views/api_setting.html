@@ -176,7 +176,7 @@
 	</section>
 	<section class="section">
 		<h1>Apple API / {$lang->php_version_seven_decimal_four}</h1>
-		
+
 		<div class="x_control-group">
 			<label class="x_control-label" for="apple_client_id">Client ID</label>
 			<div class="x_controls">
@@ -209,7 +209,7 @@
 				<!--@end-->
 			</div>
 		</div>
-		
+
 		<div class="x_control-group">
 			<label class="x_control-label">Redirect Path</label>
 			<div class="x_controls">
@@ -223,6 +223,41 @@
 			</div>
 		</div>
 	</section>
+
+	<section class="section">
+		<h1>Tiktok API</h1>
+		<div class="x_control-group">
+			<label class="x_control-label" for="tiktok_app_id">App ID</label>
+			<div class="x_controls">
+				<input type="text" name="tiktok_app_id" id="tiktok_app_id" value="{$config->tiktok_app_id}" />
+				<a href="#tiktok_app_id_help" class="x_icon-question-sign" data-toggle>{$lang->help}</a>
+				<p id="tiktok_app_id_help" class="x_help-block" hidden>{$lang->about_tiktok_app_id}</p>
+			</div>
+		</div>
+		<div class="x_control-group">
+			<label class="x_control-label" for="tiktok_client_key">Client key</label>
+			<div class="x_controls">
+				<input type="text" name="tiktok_client_key" id="tiktok_client_key" value="{$config->tiktok_client_key}" />
+				<a href="#tiktok_client_key_help" class="x_icon-question-sign" data-toggle>{$lang->help}</a>
+				<p id="tiktok_client_key_help" class="x_help-block" hidden>{$lang->about_tiktok_client_key}</p>
+			</div>
+		</div>
+		<div class="x_control-group">
+			<label class="x_control-label" for="tiktok_client_secret">Client Secret</label>
+			<div class="x_controls">
+				<input type="text" name="tiktok_client_secret" id="tiktok_client_secret" value="{$config->tiktok_client_secret}" />
+				<a href="#tiktok_client_secret_help" class="x_icon-question-sign" data-toggle>{$lang->help}</a>
+				<p id="tiktok_client_secret_help" class="x_help-block" hidden>{$lang->about_tiktok_client_secret}</p>
+			</div>
+		</div>
+		<div class="x_control-group">
+			<label class="x_control-label">Redirect Path</label>
+			<div class="x_controls">
+				{getNotEncodedFullUrl('', 'module', 'sociallogin', 'act', 'procSocialloginCallback','service','tiktok')}
+			</div>
+		</div>
+	</section>
+
 	<div class="x_clearfix btnArea">
 		<span class="x_pull-right"><input class="x_btn x_btn-primary" type="submit" value="{$lang->cmd_save}" /></span>
 	</div>

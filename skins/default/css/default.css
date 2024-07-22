@@ -9,6 +9,7 @@
 .sns_icon.naver{background:url(../img/naver.png) no-repeat;}
 .sns_icon.kakao{background:url(../img/kakao.png) no-repeat;}
 .sns_icon.discord{background:url(../img/discord.png) no-repeat;}
+.sns_icon.tiktok {background:url(../img/tiktok.svg) no-repeat; width:26px;height:26px;}
 
 .sociallogin_login{padding:0;margin:20px 0 0 0;list-style:none; overflow:hidden;}
 .sociallogin_login li{display:block;padding:0; margin-bottom:10px; text-align:center;}
@@ -31,7 +32,7 @@
 .sociallogin_facebook .loginBtn:hover {background: #5577BD;cursor:hand;}
 .sociallogin_facebook span.label {font-weight:bold;}
 .sociallogin_facebook span.icon {background: url('../img/btn_facebook.png') transparent 10px 50% no-repeat;display: inline-block;vertical-align: middle;width: 43px;height:40px;}
-.sociallogin_facebook span.buttonText {display:inline-block;vertical-align:middle;padding-left:10px;}
+.sociallogin_facebook span.buttonText {display:inline-block;vertical-align:middle;padding-left:10px; font-size:12px;}
 
 .sociallogin_google .loginBtn {display:inline-block;background: #ffffff; font-family: 'Roboto-Medium'; color:#333333; width: 200px; border-radius:5px;text-align:left;}
 .sociallogin_google a.loginBtn {text-decoration:none;}
@@ -73,3 +74,10 @@
 .sociallogin_apple span.label {font-weight:bold;}
 .sociallogin_apple span.icon {background: url('../img/btn_apple.png') transparent 10px 50% no-repeat;display: inline-block;vertical-align: middle;width: 43px;height:40px;}
 .sociallogin_apple span.buttonText {display:inline-block;vertical-align:middle;padding-left:10px;}
+
+.sociallogin_tiktok .loginBtn {display:inline-block;background: white;color:#3c1e1e; width: 200px; border-radius:5px;text-align:left;}
+.sociallogin_tiktok a.loginBtn {text-decoration:none;}
+.sociallogin_tiktok .loginBtn:hover {background: #d8d8d8;cursor:hand;}
+.sociallogin_tiktok span.label {font-weight:bold;}
+.sociallogin_tiktok span.icon {background: url('../img/tiktok.svg'); display: inline-block;vertical-align: middle;width: 43px;height:40px;}
+.sociallogin_tiktok span.buttonText {display:inline-block;vertical-align:middle;padding-left:10px;}

@@ -18,6 +18,7 @@ class Base extends \ModuleObject
 		'discord',
 		'github',
 		'apple',
+		'tiktok',
 	);
 
 	public static function getConfig()

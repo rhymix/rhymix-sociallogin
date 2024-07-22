@@ -147,11 +147,23 @@ class User extends Base
 		$signString = ($type === 'signup') ? 'Sign up' : 'Sign in';
 		foreach ($snsList as $key => $sns)
 		{
-			$ucfirstName = ucfirst($sns->name);
-			$buff[] = "<li><div class=\"sociallogin_{$sns->name}\">";
-			$buff[] = "<a class=\"loginBtn\" href=\"{$sns->auth_url}\"><span class=\"icon\"></span>";
-			$buff[] = "<span class=\"buttonText\"> {$signString} with {$ucfirstName}</span>";
-			$buff[] = '</a></div></li>';
+			if ($sns->name == 'tiktok')
+			{
+				$ucfirstName = ucfirst($sns->name);
+				$buff[] = "<li><div class=\"sociallogin_{$sns->name}\">";
+				$buff[] = "<a class=\"loginBtn\" href=\"{$sns->auth_url}\"><img src='./modules/sociallogin/skins/default/img/tiktok.svg' style='width:32px; margin:10px 1px 10px 10px;' /><span class=\"buttonText\"> {$signString} with {$ucfirstName}</span>";
+				$buff[] = '</a></div></li>';
+
+			}
+			else
+			{
+				$ucfirstName = ucfirst($sns->name);
+				$buff[] = "<li><div class=\"sociallogin_{$sns->name}\">";
+				$buff[] = "<a class=\"loginBtn\" href=\"{$sns->auth_url}\"><span class=\"icon\"></span>";
+				$buff[] = "<span class=\"buttonText\"> {$signString} with {$ucfirstName}</span>";
+				$buff[] = '</a></div></li>';
+			}
+
 		}
 		$buff[] = '</ul>';
 		
