@@ -2,8 +2,8 @@
 <module version="0.2">
 	<title xml:lang="ko">소셜 로그인</title>
 	<description xml:lang="ko">SNS 로그인과 연동을 지원하는 모듈입니다.</description>
-	<version>RX_VERSION</version>
-	<date>RX_CORE</date>
+	<version>1.0.0</version>
+	<date>2024-07-22</date>
 	<category>service</category>
 	<author email_address="conorycom@gmail.com" link="https://xe.conory.com">
 		<name xml:lang="ko">CONORY</name>
