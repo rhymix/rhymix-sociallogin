@@ -1,6 +1,6 @@
 @charset "utf-8";
 
-@import url("http://fonts.googleapis.com/css?family=Roboto:400,300,100,500,700");
+@import url("https://fonts.googleapis.com/css?family=Roboto:400,300,100,500,700");
 
 .sns_icon{padding:0 0 3px 28px;}
 .sns_icon.twitter{background:url(../img/twitter.png) no-repeat;}
