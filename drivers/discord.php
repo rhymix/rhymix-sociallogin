@@ -75,8 +75,11 @@ class Discord extends Base
 		// ID, 이름, 프로필 이미지, 프로필 URL
 		$profileValue['email_address'] = $user_info['email'];
 		$profileValue['sns_id'] = $user_info['id'];
-		$profileValue['user_name'] = $user_info['username'];
+		$profileValue['user_name'] = $user_info['global_name'] ?: $user_info['username'];
 		$profileValue['etc'] = $user_info;
+
+		// 프로필 이미지가 있다면 사용
+		if($user_info['avatar']) $profileValue['profile_image'] = "https://cdn.discordapp.com/{$user_info['id']}/{$user_info['avatar']}.png";
 
 		\Rhymix\Modules\Sociallogin\Base::setDriverAuthData('discord', 'profile', $profileValue);
 	}
