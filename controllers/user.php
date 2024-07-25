@@ -390,7 +390,6 @@ class User extends Base
 		$nick_name = preg_replace('/[\pZ\pC]+/u', '', $_SESSION['sociallogin_access_data']->nick_name);
 
 		$vars = Context::getRequestVars();
-		debugPrint($vars);
 		if($vars->email_address)
 		{
 			$email = $vars->email_address;
@@ -406,23 +405,11 @@ class User extends Base
 		Context::set('email_address', $email, true);
 		Context::set('accept_agreement', 'Y', true);
 
-
 		Context::set('homepage', $_SESSION['sociallogin_access_data']->homepage, true);
 		Context::set('blog', $_SESSION['sociallogin_access_data']->blog, true);
 		Context::set('birthday', $_SESSION['sociallogin_access_data']->birthday, true);
 		Context::set('gender', $_SESSION['sociallogin_access_data']->gender, true);
 		Context::set('age', $_SESSION['sociallogin_access_data']->age, true);
-
-		debugPrint(Context::get('password'));
-		debugPrint(Context::get('nick_name'));
-		debugPrint(Context::get('user_name'));
-		debugPrint(Context::get('email_address'));
-		debugPrint(Context::get('accept_agreement'));
-		debugPrint(Context::get('homepage'));
-		debugPrint(Context::get('blog'));
-		debugPrint(Context::get('birthday'));
-		debugPrint(Context::get('gender'));
-		debugPrint(Context::get('age'));
 
 		// 회원 모듈에 가입 요청
 		// try 를 쓰는이유는 회원가입시 어떤 실패가 일어나는 경우 BaseObject으로 리턴하지 않기에 에러를 출력하기 위함입니다.

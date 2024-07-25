@@ -123,7 +123,6 @@ class Facebook extends Base
 			}
 		}
 
-
 		// 이메일 주소
 		if ($profile['email'])
 		{
