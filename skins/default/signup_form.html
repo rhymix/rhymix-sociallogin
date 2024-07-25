@@ -1,0 +1,67 @@
+<load target="../../tpl/js/signup_check.js" />
+<!--// datepicker javascript plugin load -->
+<!--%load_js_plugin("ui")-->
+<!--%load_js_plugin("ui.datepicker")-->
+<include target="../../modules/member/skins/default/common_header.html" />
+<h1 style="border-bottom:1px solid #ccc">추가 정보 입력 해주세요.</h1>
+<div cond="$XE_VALIDATOR_MESSAGE && $XE_VALIDATOR_ID == 'modules/sociallogin/skins'" class="message {$XE_VALIDATOR_MESSAGE_TYPE}">
+	<p>{$XE_VALIDATOR_MESSAGE}</p>
+</div>
+<form id="fo_insert_member" action="./" method="post" enctype="multipart/form-data" class="form-horizontal">
+	<input type="hidden" name="act" value="procSocialloginMemberSignup" />
+	<input type="hidden" name="xe_validator_id" value="modules/sociallogin/skins" />
+	<input type="hidden" name="success_return_url" value="" />
+	<div class="agreement" loop="$member_config->agreements => $i, $agreement" cond="$agreement->type !== 'disabled'">
+		<div class="title">
+			{$agreement->title}
+			<block cond="$agreement->type === 'required'">({$lang->cmd_required})</block>
+			<block cond="$agreement->type === 'optional'">({$lang->cmd_optional})</block>
+		</div>
+		<div class="text">
+			{$agreement->content}
+		</div>
+		<div class="confirm">
+			<label for="accept_agreement_{$i}">
+				<input type="checkbox" name="accept_agreement[{$i}]" value="Y" id="accept_agreement_{$i}" required="required"|cond="$agreement->type === 'required'" />
+				{$lang->about_accept_agreement}
+			</label>
+		</div>
+	</div>
+	<div class="control-group" cond="$identifierForm->show">
+		<label for="{$identifierForm->name}" class="control-label"><em style="color:red">*</em> {$identifierForm->title}</label>
+		<div class="controls">
+			<input type="text"|cond="$identifierForm->name!='email_address'" type="email"|cond="$identifierForm->name=='email_address'" name="{$identifierForm->name}" id="{$identifierForm->name}" value="" required />
+			<p class="help-inline" cond="$identifierForm->name == 'email_address' && $email_confirmation_required == 'Y'">
+				{$lang->msg_email_confirmation_required}
+			</p>
+		</div>
+	</div>
+	<div class="control-group" loop="$formTags=>$formTag">
+		<label for="{$formTag->name}" class="control-label">{$formTag->title}</label>
+		<div class="controls" cond="$formTag->name != 'signature'">
+			{$formTag->inputTag}
+			<p class="help-inline" cond="$formTag->name == 'email_address' && $email_confirmation_required == 'Y'">
+				{$lang->msg_email_confirmation_required}
+			</p>
+		</div>
+		<div class="controls" cond="$formTag->name == 'signature'">
+			<input type="hidden" name="signature" value="" />
+			{$editor|noescape}
+			<style scoped>
+				.xpress-editor>#smart_content,
+				.xpress-editor>#smart_content>.tool{clear:none}
+			</style>
+		</div>
+	</div>
+
+	<div class="control-group captcha" cond="isset($captcha) && $captcha && $captcha->isTargetAction('signup')">
+		<div class="control-label">{$lang->captcha}</div>
+		<div class="controls">{$captcha}</div>
+	</div>
+	<div class="btnArea" style="border-top:1px solid #ccc;padding-top:10px">
+		<input type="submit" value="{$lang->cmd_registration}" class="btn btn-inverse pull-right" />
+		<a href="{getUrl('act','','member_srl','')}" class="btn pull-left">{$lang->cmd_cancel}</a>
+	</div>
+</form>
+
+<include target="../../modules/member/skins/default/common_footer.html" />

@@ -19,9 +19,9 @@ class Facebook extends Base
 		$scope = array(
 			'public_profile',
 			'email',
-			//'user_about_me',
-			//'user_website',
-			//'user_birthday',
+//			'user_about_me',
+//			'user_website',
+			'user_birthday',
 		);
 
 		// 요청 파라미터
@@ -54,6 +54,7 @@ class Facebook extends Base
 			'client_secret' => $this->config->facebook_app_secret,
 			'redirect_uri'  => getNotEncodedFullUrl('', 'module', 'sociallogin', 'act', 'procSocialloginCallback', 'service', 'facebook'),
 		));
+
 
 		// API 요청 : 장기 실행 토큰(60일) (토큰 새로고침 대신)
 		$token = $this->requestAPI('/oauth/access_token', array(
@@ -121,6 +122,8 @@ class Facebook extends Base
 				return new \BaseObject(-1, sprintf(lang('msg_not_sns_follower_count'), $this->config->sns_follower_count));
 			}
 		}
+
+
 		// 이메일 주소
 		if ($profile['email'])
 		{

@@ -11,6 +11,12 @@
 			<route route="callback/$service" priority="100" />
 		</action>
 
+		<action name="dispSocialloginMemberSignup" class="Controllers\User" standalone="true">
+			<route route="social/signup" />
+		</action>
+
+		<action name="procSocialloginMemberSignup" class="Controllers\User" standalone="true" />
+
 		<action name="dispSocialloginAdminSettingApi" class="Controllers\Admin" menu_name="sociallogin"/>
 		<action name="dispSocialloginAdminSetting" class="Controllers\Admin" menu_name="sociallogin"/>
 		<action name="dispSocialloginAdminLogRecord" class="Controllers\Admin" menu_name="sociallogin"/>

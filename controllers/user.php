@@ -8,6 +8,7 @@ use MemberModel;
 use Mobile;
 use Rhymix\Framework\Exceptions\InvalidRequest;
 use Rhymix\Framework\Exception;
+use Rhymix\Framework\Pagination;
 use Rhymix\Framework\Session;
 use Rhymix\Modules\Sociallogin\Base;
 use Rhymix\Modules\Sociallogin\Models\Config as ConfigModel;
@@ -310,5 +311,166 @@ class User extends Base
 		$this->setMessage('msg_success_sns_register_clear');
 
 		$this->setRedirectUrl(getNotEncodedUrl('', 'mid', Context::get('mid'), 'act', 'dispSocialloginSnsManage'));
+	}
+
+	public function dispSocialloginMemberSignup()
+	{
+		$oMemberView = \MemberView::getInstance();
+		$oMemberView->dispMemberSignUpForm();
+
+		$formTags = Context::get('formTags');
+
+		$sociallogin_access_data = $_SESSION['sociallogin_access_data'];
+
+		$formVars = array(
+			'profile_url' => false,
+			'profile_image' => false,
+			'email' => false,
+			'name' => false,
+			'nick_name' => false,
+		);
+
+		foreach ($formVars as $key => $formVar)
+		{
+			if(isset($sociallogin_access_data->{$key}))
+			{
+				$formVars[$key] = true;
+			}
+		}
+
+		if($_SESSION['tmp_sociallogin_input_add_info'])
+		{
+			foreach ($formTags as $key => $formtag)
+			{
+				if(!preg_match('/>*</', $formtag->title))
+				{
+					unset($formTags[$key]);
+				}
+				if($_SESSION['tmp_sociallogin_input_add_info']['nick_name'])
+				{
+					if($formtag->name == 'user_id')
+					{
+						unset($formTags[$key]);
+					}
+
+					if($formtag->name == 'user_name')
+					{
+						unset($formTags[$key]);
+					}
+
+					if($formtag->name == 'nick_name')
+					{
+						unset($formTags[$key]);
+					}
+				}
+			}
+		}
+		$identifierForm = new \stdClass;
+		$identifierForm->title = lang($oMemberView->member_config->identifier);
+		$identifierForm->name = $oMemberView->member_config->identifier;
+		$identifierForm->show = true;
+		if(isset($_SESSION['tmp_sociallogin_input_add_info']['email_address']))
+		{
+			$identifierForm->show = false;
+		}
+
+		Context::set('formVars', $formVars);
+		Context::set('formTags', $formTags);
+		Context::set('email_confirmation_required', $oMemberView->member_config->enable_confirm);
+		Context::set('identifierForm', $identifierForm);
+
+		// Set a template file
+		$this->setTemplateFile('signup_form');
+	}
+
+	public function procSocialloginMemberSignup()
+	{
+		Context::setRequestMethod('POST');
+		$password = \Rhymix\Framework\Password::getRandomPassword(13);
+		$nick_name = preg_replace('/[\pZ\pC]+/u', '', $_SESSION['sociallogin_access_data']->nick_name);
+
+		$vars = Context::getRequestVars();
+		debugPrint($vars);
+		if($vars->email_address)
+		{
+			$email = $vars->email_address;
+		}
+		else
+		{
+			$email = $_SESSION['sociallogin_access_data']->email;
+		}
+
+		Context::set('password', $password, true);
+		Context::set('nick_name', $nick_name, true);
+		Context::set('user_name', $_SESSION['sociallogin_access_data']->user_name, true);
+		Context::set('email_address', $email, true);
+		Context::set('accept_agreement', 'Y', true);
+
+
+		Context::set('homepage', $_SESSION['sociallogin_access_data']->homepage, true);
+		Context::set('blog', $_SESSION['sociallogin_access_data']->blog, true);
+		Context::set('birthday', $_SESSION['sociallogin_access_data']->birthday, true);
+		Context::set('gender', $_SESSION['sociallogin_access_data']->gender, true);
+		Context::set('age', $_SESSION['sociallogin_access_data']->age, true);
+
+		debugPrint(Context::get('password'));
+		debugPrint(Context::get('nick_name'));
+		debugPrint(Context::get('user_name'));
+		debugPrint(Context::get('email_address'));
+		debugPrint(Context::get('accept_agreement'));
+		debugPrint(Context::get('homepage'));
+		debugPrint(Context::get('blog'));
+		debugPrint(Context::get('birthday'));
+		debugPrint(Context::get('gender'));
+		debugPrint(Context::get('age'));
+
+		// 회원 모듈에 가입 요청
+		// try 를 쓰는이유는 회원가입시 어떤 실패가 일어나는 경우 BaseObject으로 리턴하지 않기에 에러를 출력하기 위함입니다.
+		try
+		{
+			$output = getController('member')->procMemberInsert();
+		}
+		catch (Exception $exception)
+		{
+			// 리턴시에도 세션값을 비워줘야함
+			unset($_SESSION['tmp_sociallogin_input_add_info']);
+			throw new Exception($exception->getMessage());
+		}
+		unset($_SESSION['tmp_sociallogin_input_add_info']);
+
+		// 가입 도중 오류가 있다면 즉시 출력
+		if (is_object($output) && method_exists($output, 'toBool') && !$output->toBool())
+		{
+			if ($output->error != -1)
+			{
+				// 리턴값을 따로 저장.
+				$return_output = $output;
+			}
+			else
+			{
+				return $output;
+			}
+		}
+
+		// 가입 완료 체크
+		if (!$member_srl = getModel('member')->getMemberSrlByEmailAddress($email))
+		{
+			throw new Exception('msg_error_register_sns');
+		}
+
+
+		unset($_SESSION['tmp_sociallogin_input_add_info']);
+
+		self::clearSession();
+
+		// 가입 완료 후 메세지 출력 (메일 인증 메세지)
+		if ($return_output)
+		{
+			return $return_output;
+		}
+		$this->setMessage('가입이 완료되었습니다.');
+
+		$redirect_url = getModel('module')->getModuleConfig('member')->after_login_url ?: getNotEncodedUrl('', 'mid', $_SESSION['sociallogin_current']['mid'], 'act', '');
+		$this->setRedirectUrl($redirect_url);
 	}
 }
