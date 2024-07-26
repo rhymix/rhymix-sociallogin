@@ -95,11 +95,7 @@ class Github extends Base
 		{
 			$profileValue['email_address'] = $profile['email'];
 		}
-		else
-		{
-			return new \BaseObject(-1, 'msg_not_confirm_email_sns_for_sns');
-		}
-		
+
 		$profileValue['sns_id'] = $profile['id'];
 		$profileValue['user_name'] = $profile['login'];
 		$profileValue['profile_image'] = $profile['avatar_url'];

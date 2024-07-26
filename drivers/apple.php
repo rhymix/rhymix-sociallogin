@@ -107,11 +107,7 @@ class Apple extends Base
 		{
 			$profileValue['email_address'] = $profile['email'];
 		}
-		else
-		{
-			return new \BaseObject(-1, 'msg_not_confirm_email_sns_for_sns');
-		}
-		
+
 		\Rhymix\Modules\Sociallogin\Base::setDriverAuthData('apple', 'profile', $profileValue);
 
 		return new \BaseObject();

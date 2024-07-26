@@ -90,11 +90,7 @@ class Kakao extends Base
 		{
 			$profileValue['email_address'] = $profile['kakao_account']['email'];
 		}
-		else
-		{
-			return new \BaseObject(-1, 'msg_not_confirm_email_sns_for_sns');
-		}
-		
+
 		$profileValue['sns_id'] = $profile['id'];
 		$profileValue['user_name'] = $profile['properties']['nickname'] ?: $profile['story']['nickName'];
 		$profileValue['profile_image'] = $profile['properties']['profile_image'] ?: $profile['story']['profileImageURL'];

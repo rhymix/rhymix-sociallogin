@@ -103,10 +103,6 @@ class Twitter extends Base
 		{
 			$profileValue['email_address'] = $profile->email;
 		}
-		else
-		{
-			return new \BaseObject(-1, 'msg_not_confirm_email_sns_for_sns');
-		}
 
 		// ID, 이름, 프로필 이미지, 프로필 URL
 		$profileValue['sns_id'] = $profile->id;
