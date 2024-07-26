@@ -357,11 +357,6 @@ class User extends Base
 					{
 						unset($formTags[$key]);
 					}
-
-					if($formtag->name == 'nick_name')
-					{
-						unset($formTags[$key]);
-					}
 				}
 			}
 		}
@@ -400,7 +395,7 @@ class User extends Base
 		}
 
 		Context::set('password', $password, true);
-		Context::set('nick_name', $nick_name, true);
+//		Context::set('nick_name', $nick_name, true);
 		Context::set('user_name', $_SESSION['sociallogin_access_data']->user_name, true);
 		Context::set('email_address', $email, true);
 		Context::set('accept_agreement', 'Y', true);
@@ -419,11 +414,9 @@ class User extends Base
 		}
 		catch (Exception $exception)
 		{
-			// 리턴시에도 세션값을 비워줘야함
-			unset($_SESSION['tmp_sociallogin_input_add_info']);
 			throw new Exception($exception->getMessage());
 		}
-		unset($_SESSION['tmp_sociallogin_input_add_info']);
+
 
 		// 가입 도중 오류가 있다면 즉시 출력
 		if (is_object($output) && method_exists($output, 'toBool') && !$output->toBool())
@@ -446,7 +439,6 @@ class User extends Base
 		}
 
 
-		unset($_SESSION['tmp_sociallogin_input_add_info']);
 
 		self::clearSession();
 
@@ -456,6 +448,9 @@ class User extends Base
 			return $return_output;
 		}
 		$this->setMessage('가입이 완료되었습니다.');
+
+		unset($_SESSION['tmp_sociallogin_input_add_info']);
+		unset($_SESSION['tmp_sociallogin_input_add_info']);
 
 		$redirect_url = getModel('module')->getModuleConfig('member')->after_login_url ?: getNotEncodedUrl('', 'mid', $_SESSION['sociallogin_current']['mid'], 'act', '');
 		$this->setRedirectUrl($redirect_url);
