@@ -15,7 +15,7 @@
 		<condition operation="equal" column="sociallogin.service" var="service" pipe="and"/>
 		<group pipe="and">
 			<condition operation="like" column="member.nick_name" var="nick_name" pipe="or" />
-			<condition operation="like" column="member.email_address" var="email" pipe="or" />
+			<condition operation="like" column="member.email_address" var="email_address" pipe="or" />
 		</group>
 	</conditions>
 	<navigation>
