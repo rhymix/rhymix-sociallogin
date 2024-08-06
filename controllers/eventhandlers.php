@@ -13,11 +13,48 @@ class EventHandlers extends Base
 	/**
 	 * Add member menu for SNS management.
 	 */
-	public function triggerAfterModuleObject()
+	public function triggerAfterModuleObject(&$oModule)
 	{
 		if ($this->user->isMember() && (self::getConfig()->sns_manage ?? '') === 'Y')
 		{
 			MemberController::getInstance()->addMemberMenu('dispSocialloginSnsManage', 'sns_manage');
+		}
+	}
+
+	/**
+	 * Trigger before module handler.
+	 */
+	public function triggerBeforeModuleHandler(&$oModule)
+	{
+		$act = $oModule->act;
+		$checkAct = false;
+
+		if($act === 'dispMemberModifyInfo' || $act === 'dispMemberModifyPassword')
+		{
+			if($_SESSION['rechecked_password_step'] !== 'VALIDATE_PASSWORD')
+			{
+				$checkAct = true;
+			}
+		}
+
+		if(!$checkAct)
+		{
+			return;
+		}
+		else
+		{
+			$actTarget = $oModule->act;
+		}
+
+		$userSNSList = \Rhymix\Modules\Sociallogin\Models\User::getMemberSnsList(\Rhymix\Framework\Session::getMemberSrl(), 'recheck');
+		if($userSNSList)
+		{
+			$redirect_url = getNotEncodedUrl('', 'mid', 'member', 'act', 'dispSocialloginMemberAuthRecheck');
+
+			$_SESSION['sociallogin_target'] = $actTarget;
+			header('Location: ' . $redirect_url, true, 302);
+			Context::close();
+			exit;
 		}
 	}
 

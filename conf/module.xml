@@ -15,7 +15,16 @@
 			<route route="social/signup" />
 		</action>
 
+		<action name="dispSocialloginMemberAuthRecheck" class="Controllers\User" standalone="true">
+			<route route="social/recheck" />
+		</action>
+
+		<action name="dispSocialloginMemberModifyPassword" class="Controllers\User" standalone="true">
+			<route route="social/modify_password" />
+		</action>
+
 		<action name="procSocialloginMemberSignup" class="Controllers\User" standalone="true" />
+		<action name="procSocialloginMemberModifyPassword" class="Controllers\User" standalone="true" />
 
 		<action name="dispSocialloginAdminSettingApi" class="Controllers\Admin" menu_name="sociallogin"/>
 		<action name="dispSocialloginAdminSetting" class="Controllers\Admin" menu_name="sociallogin"/>

@@ -438,8 +438,6 @@ class User extends Base
 			throw new Exception('msg_error_register_sns');
 		}
 
-
-
 		self::clearSession();
 
 		// 가입 완료 후 메세지 출력 (메일 인증 메세지)
@@ -454,5 +452,118 @@ class User extends Base
 
 		$redirect_url = getModel('module')->getModuleConfig('member')->after_login_url ?: getNotEncodedUrl('', 'mid', $_SESSION['sociallogin_current']['mid'], 'act', '');
 		$this->setRedirectUrl($redirect_url);
+	}
+
+	public function dispSocialloginMemberAuthRecheck()
+	{
+		$is_logged = Context::get('is_logged');
+		if(!$is_logged)
+		{
+			throw new Exception('msg_not_logged');
+		}
+
+		if(!$_SESSION['sociallogin_target'])
+		{
+			throw new Exception('msg_invalid_request');
+		}
+
+		$userSNSList = \Rhymix\Modules\Sociallogin\Models\User::getMemberSnsList(\Rhymix\Framework\Session::getMemberSrl(), 'recheck');
+		Context::set('member_sns_list', $userSNSList);
+
+		$this->setTemplateFile('recheck_auth');
+	}
+
+	public function dispSocialloginMemberModifyPassword()
+	{
+		// A message appears if the user is not logged-in
+		if(!$this->user->member_srl)
+		{
+			throw new \Rhymix\Framework\Exceptions\MustLogin;
+		}
+
+		/** @var \MemberView $oMemberView */
+		$oMemberView = getView('member');
+		if (!$oMemberView->checkMidAndRedirect())
+		{
+			return;
+		}
+
+		$memberConfig = $oMemberView->member_config;
+		$logged_info = Context::get('logged_info');
+		$member_srl = $logged_info->member_srl;
+
+		$columnList = array('member_srl', 'user_id');
+		$member_info = MemberModel::getMemberInfoByMemberSrl($member_srl, 0, $columnList);
+		Context::set('member_info',$member_info);
+
+		if($memberConfig->identifier == 'user_id')
+		{
+			Context::set('identifier', 'user_id');
+			Context::set('formValue', $member_info->user_id);
+		}
+		else
+		{
+			Context::set('identifier', 'email_address');
+			Context::set('formValue', $member_info->email_address);
+		}
+		// Set a template file
+		$this->setTemplateFile('modify_password');
+	}
+
+	public function procSocialloginMemberModifyPassword()
+	{
+		$config = MemberModel::getMemberConfig();
+		$vars = Context::getRequestVars();
+		if (!$this->user->member_srl)
+		{
+			throw new \Rhymix\Framework\Exceptions\MustLogin;
+		}
+
+		if(trim($vars->password1) !== trim($vars->password2))
+		{
+			throw new Exception('비밀번호가 서로 일치하지 않습니다.');
+		}
+
+		// Extract the necessary information in advance
+		$password = trim($vars->password1);
+
+		// Get information of logged-in user
+		$member_srl = $this->user->member_srl;
+
+		if($_SESSION['rechecked_password_step'] !== 'VALIDATE_PASSWORD')
+		{
+			throw new \Rhymix\Framework\Exceptions\InvalidRequest;
+		}
+
+		// Execute insert or update depending on the value of member_srl
+		$args = new \stdClass;
+		$args->member_srl = $member_srl;
+		$args->password = $password;
+		$oMemberController = MemberController::getInstance();
+
+		$output = $oMemberController->updateMemberPassword($args);
+		if (!$output->toBool())
+		{
+			return $output;
+		}
+
+		// Log out all other sessions.
+		if ($config->password_change_invalidate_other_sessions === 'Y')
+		{
+			\Rhymix\Framework\Session::destroyOtherSessions($member_srl);
+		}
+
+		$oMemberController->add('member_srl', $member_srl);
+		$oMemberController->setMessage('member.msg_password_changed');
+
+		if (Context::get('success_return_url'))
+		{
+			$returnUrl = Context::get('success_return_url');
+		}
+		else
+		{
+			$returnUrl = getNotEncodedUrl('', 'mid', Context::get('mid'), 'act', 'dispMemberInfo');
+		}
+		$this->setRedirectUrl($returnUrl);
 	}
 }

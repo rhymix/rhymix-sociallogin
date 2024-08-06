@@ -1,0 +1,23 @@
+<load target="css/default.css" />
+<include target="../../../member/skins/default/common_header.html" />
+<div cond="$XE_VALIDATOR_MESSAGE" class="message {$XE_VALIDATOR_MESSAGE_TYPE}">
+	<p>{$XE_VALIDATOR_MESSAGE}</p>
+</div>
+<div class="signin">
+	<div class="login-header">
+		<h1><i class="icon-user"></i>SNS 인증</h1>
+	</div>
+	<div class="login-body">
+		<ul class="sns_login">
+			<li loop="$member_sns_list=> $key, $val">
+				<div id="sns_{$val->service}">
+					<a href="{$val->auth_url}" class="loginBtn">
+						<span class="icon"></span>
+						<span class="buttonText">{ucwords($val->service)} Login</span>
+					</a>
+				</div>
+			</li>
+		</ul>
+	</div>
+</div>
+<include target="../../../member/skins/default/common_footer.html" />

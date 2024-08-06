@@ -100,15 +100,16 @@ class Connect extends Base
 					{
 						$error = lang('sociallogin.msg_invalid_sns_account');
 					}
-					$redirect_url = getNotEncodedUrl('', 'mid', Context::get('mid'), 'act', 'dispMemberModifyInfo');
-					break;
-				case 'modify_password':
-					$recheckBool = $this->reCheckSns($oDriver, $type);
-					if(!$recheckBool)
+
+					if($_SESSION['sociallogin_target'] === 'dispMemberModifyPassword')
 					{
-						$error = lang('sociallogin.msg_invalid_sns_account');
+						$redirect_url = getNotEncodedUrl('', 'mid', 'member', 'act', 'dispSocialloginMemberModifyPassword');
 					}
-					$redirect_url = getNotEncodedUrl('', 'mid', Context::get('mid'), 'act', 'dispMemberModifyPassword');
+					else
+					{
+						$redirect_url = getNotEncodedUrl('', 'mid', 'member', 'act', $_SESSION['sociallogin_target']);
+					}
+
 					break;
 				default:
 					$error = lang('sociallogin.msg_not_exist_type');
@@ -137,6 +138,11 @@ class Connect extends Base
 		if ($type == 'register')
 		{
 			$this->setRedirectUrl(getNotEncodedUrl('', 'mid', $_SESSION['sociallogin_current']['mid'], 'act', 'dispSocialloginSnsManage'));
+		}
+		elseif ($type == 'recheck')
+		{
+			unset($_SESSION['sociallogin_target']);
+			$this->setRedirectUrl($redirect_url);
 		}
 		else
 		{
@@ -600,22 +606,17 @@ class Connect extends Base
 			}
 		}
 		
-		if($isCheck)
-		{
-			if($type == 'recheck')
-			{
-				$_SESSION['rechecked_password_step'] = 'VALIDATE_PASSWORD';
-			}
-			else
-			{
-				$_SESSION['rechecked_password_modify'] = 'VALIDATE_PASSWORD';
-			}
-			return true;
-		}
-		else
+		if(!$isCheck)
 		{
 			return false;
 		}
+
+		if($type == 'recheck')
+		{
+			$_SESSION['rechecked_password_step'] = 'VALIDATE_PASSWORD';
+		}
+
+		return true;
 	}
 
 	/**

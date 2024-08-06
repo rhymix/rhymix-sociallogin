@@ -9,6 +9,7 @@ class Install extends Base
 {
 	protected static $_insert_triggers = array(
 		array('moduleObject.proc', 'after', 'Controllers\EventHandlers', 'triggerAfterModuleObject'),
+		array('moduleHandler.init', 'before', 'Controllers\EventHandlers', 'triggerBeforeModuleHandler'),
 		array('member.procMemberInsert', 'before', 'Controllers\EventHandlers', 'triggerBeforeInsertMember'),
 		array('member.insertMember', 'after', 'Controllers\EventHandlers', 'triggerAfterInsertMember'),
 		array('member.deleteMember', 'after', 'Controllers\EventHandlers', 'triggerAfterDeleteMember'),
@@ -18,6 +19,7 @@ class Install extends Base
 
 	protected static $_delete_triggers = array(
 		array('moduleObject.proc', 'after', 'controller', 'triggerModuleObjectAfter'),
+		array('moduleObject.proc', 'before', 'Controllers\EventHandlers', 'triggerBeforeModuleObject'),
 		array('member.procMemberInsert', 'before', 'controller', 'triggerProcInsertMemberBefore'),
 		array('member.insertMember', 'after', 'controller', 'triggerInsertMemberAfter'),
 		array('member.deleteMember', 'after', 'controller', 'triggerDeleteMember'),
