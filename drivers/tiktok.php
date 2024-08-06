@@ -19,16 +19,13 @@ class Tiktok extends Base
 
 
 		return 'https://www.tiktok.com/v2/auth/authorize?'.http_build_query($fields);
-
 	}
 
 	function authenticate()
 	{
 		// 오류가 있을 경우 메세지 출력
 		$vars = Context::getRequestVars();
-		debugPrint($vars);
 
-		$url = "https://open.tiktokapis.com/v2/oauth/token/";
 		$post = [
 			"client_key" => $this->config->tiktok_client_key,
 			"client_secret" => $this->config->tiktok_client_secret,
@@ -38,7 +35,6 @@ class Tiktok extends Base
 		];
 
 		$token = $this->requestAPI('oauth/token/', $post);
-		debugPrint($token);
 
 		$accessValue['access'] = $token['access_token'];
 		$accessValue['refresh'] = $token['refresh_token'];
@@ -55,7 +51,6 @@ class Tiktok extends Base
 	{
 		// 토큰 체크
 		$token = \Rhymix\Modules\Sociallogin\Base::getDriverAuthData('tiktok')->token['access'];
-		debugPrint($token);
 		if (!$token)
 		{
 			return new \BaseObject(-1, 'msg_errer_api_connect');
