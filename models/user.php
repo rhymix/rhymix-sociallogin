@@ -26,6 +26,7 @@ class User extends Base
 		$args = new \stdClass;
 		$args->member_srl = $member_srl;
 		$output = executeQueryArray('sociallogin.getMemberSns', $args);
+
 		$memberSNSList = $output->data;
 
 		$useSNSList = Config::getUseSNSList($type);
@@ -33,8 +34,8 @@ class User extends Base
 		{
 			$memberSNSList[$key]->auth_url = $useSNSList[$userSNSData->service]->auth_url;
 		}
-		
-		return $output->data;
+
+		return $memberSNSList;
 	}
 
 	/**
