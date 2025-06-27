@@ -225,7 +225,6 @@ class Naver extends Base
 		if ($authorization)
 		{
 			$headers = array(
-				'Host'          => 'apis.naver.com',
 				'Pragma'        => 'no-cache',
 				'Accept'        => '*/*',
 				'Authorization' => 'Bearer ' . $authorization
