@@ -6,7 +6,7 @@ class Github extends Base
 {
 	public $oProvider = null;
 	public $token = null;
-	
+
 	function getProvider()
 	{
 		if(!$this->oProvider)
@@ -18,10 +18,10 @@ class Github extends Base
 			]);
 			$this->oProvider = $provider;
 		}
-		
+
 		return $this->oProvider;
 	}
-	
+
 	/**
 	 * @brief 인증 URL 생성
 	 */
@@ -33,7 +33,7 @@ class Github extends Base
 			'state' => $_SESSION['sociallogin_auth']['state'],
 			'scope' => ['user','user:email']
 		];
-		
+
 		return $provider->getAuthorizationUrl($options);
 	}
 
@@ -43,18 +43,19 @@ class Github extends Base
 	function authenticate()
 	{
 		$provider = $this->getProvider();
-		
+
+		$code = \Context::get('code');
 		$state = \Context::get('state');
-		
-		if(!$_SESSION['sociallogin_auth']['state'] || $state != $_SESSION['sociallogin_auth']['state'])
+
+		if(!$code || !$_SESSION['sociallogin_auth']['state'] || $state != $_SESSION['sociallogin_auth']['state'])
 		{
 			return new \BaseObject(-1, "msg_invalid_request");
 		}
 
 		$token = $provider->getAccessToken('authorization_code', [
-			'code' => \Context::get('code'),
+			'code' => $code,
 		]);
-		
+
 		if($token)
 		{
 			$this->token = $token;
@@ -63,8 +64,8 @@ class Github extends Base
 		// 토큰 삽입
 		$accessValue['access'] = $token->getToken();
 		\Rhymix\Modules\Sociallogin\Base::setDriverAuthData('github', 'token', $accessValue);
-		
-		unset($_SESSION['socialxe_auth_state']);
+
+		unset($_SESSION['sociallogin_auth']['state']);
 
 		return new \BaseObject();
 	}
@@ -84,7 +85,7 @@ class Github extends Base
 		{
 			return new \BaseObject(-1, 'msg_errer_api_connect');
 		}
-		
+
 		// TODO : why do check empty value?
 		if(!$profile['email'] || $profile['email'] == '')
 		{
@@ -103,7 +104,7 @@ class Github extends Base
 		$profileValue['etc'] = $profile;
 
 		\Rhymix\Modules\Sociallogin\Base::setDriverAuthData('github', 'profile', $profileValue);
-		
+
 		return new \BaseObject();
 	}
 
