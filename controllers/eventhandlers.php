@@ -153,7 +153,7 @@ class EventHandlers extends Base
 	{
 		$config = self::getConfig();
 
-		if($config->sns_share_on_write !== 'Y')
+		if (isset($config->sns_share_on_write) && $config->sns_share_on_write !== 'Y')
 		{
 			return;
 		}
@@ -164,7 +164,7 @@ class EventHandlers extends Base
 		}
 
 		// 설정된 모듈 제외
-		if ($config->linkage_module_srl)
+		if (isset($config->linkage_module_srl) && $config->linkage_module_srl)
 		{
 			$module_srl_list = explode(',', $config->linkage_module_srl);
 

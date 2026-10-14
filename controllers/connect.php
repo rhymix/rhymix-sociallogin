@@ -31,33 +31,37 @@ class Connect extends Base
 		{
 			throw new InvalidRequest;
 		}
-		
+
 		// 인증 세션 체크
 		if (!$_SESSION['sociallogin_auth']['state'])
 		{
 			throw new InvalidRequest;
 		}
-		
+
 		// 타입 세션 체크
 		if (!$type = $_SESSION['sociallogin_auth']['type'])
 		{
 			throw new InvalidRequest;
 		}
-		
+
 		$_SESSION['sociallogin_current']['mid'] = $_SESSION['sociallogin_auth']['mid'];
 		$redirect_url = $_SESSION['sociallogin_auth']['redirect'];
 		$redirect_url = $redirect_url ? Context::getRequestUri() . '?' . $redirect_url : Context::getRequestUri();
-		
+
 		// 인증
 		$output = $oDriver->authenticate();
 		if ($output instanceof BaseObject && !$output->toBool())
 		{
 			$error = $output->getMessage();
 		}
+		else
+		{
+			$error = null;
+		}
 
 		// 인증 세션 제거
 		unset($_SESSION['sociallogin_auth']);
-		
+
 		// SNS정보를 가져옴
 		if (!$error)
 		{
@@ -69,7 +73,7 @@ class Connect extends Base
 				$oDriver->revokeToken(self::getDriverAuthData($service)->token['access']);
 			}
 		}
-		
+
 		// 등록 처리
 		if (!$error)
 		{
@@ -77,7 +81,7 @@ class Connect extends Base
 			{
 				case 'register':
 					$msg = 'msg_success_sns_register';
-					
+
 					$output = $this->registerSns($oDriver);
 					if (!$output->toBool())
 					{
@@ -90,7 +94,7 @@ class Connect extends Base
 					{
 						$error = $output->getMessage();
 					}
-					
+
 					// 로그인 후 페이지 이동 (회원 설정 참조)
 					$redirect_url = getModel('module')->getModuleConfig('member')->after_login_url ?: getNotEncodedUrl('', 'mid', $_SESSION['sociallogin_current']['mid'], 'act', '');
 					break;
@@ -123,7 +127,7 @@ class Connect extends Base
 		$info->type = $type;
 		$info->sns = $service;
 		self::logRecord($this->act, $info);
-		
+
 		// 오류
 		if ($error)
 		{
@@ -180,7 +184,7 @@ class Connect extends Base
 		{
 			throw new Exception('msg_errer_api_connect');
 		}
-		
+
 		// SNS ID 조회
 		if (($sns_info = UserModel::getMemberSnsById($id, $service)) && $sns_info->member_srl)
 		{
@@ -214,7 +218,7 @@ class Connect extends Base
 			}
 
 			$member_config = $oMemberModel::getMemberConfig();
-			
+
 			$boolRequired = false;
 
 			foreach ($member_config->signupForm as $item)
@@ -245,7 +249,7 @@ class Connect extends Base
 					break;
 				}
 			}
-			
+
 			if(!$boolRequired && ($member_config->phone_number_verify_by_sms == 'Y' && $config->use_for_phone_auth == 'Y'))
 			{
 				$boolRequired = true;
@@ -254,7 +258,7 @@ class Connect extends Base
 			// 미리 소셜 내용 기록.
 			$_SESSION['tmp_sociallogin_input_add_info'] = $oDriver->getSocial();
 			$_SESSION['tmp_sociallogin_input_add_info']['nick_name'] = $nick_name;
-			
+
 			if($email)
 			{
 				$_SESSION['tmp_sociallogin_input_add_info']['email_address'] = $email;
@@ -306,7 +310,7 @@ class Connect extends Base
 				$args->birthday = $extend->birthday;
 				$args->gender = $extend->gender;
 				$args->age = $extend->age;
-				
+
 				//TODO (BjRambo) :check again, why save to sessionData?
 				$_SESSION['sociallogin_access_data'] = $args;
 				return $this->setRedirectUrl(getNotEncodedUrl('', 'module', 'member', 'act', 'dispSocialloginMemberSignup', 'service', $oDriver->getService()));
@@ -324,7 +328,7 @@ class Connect extends Base
 			Context::set('birthday', $extend->birthday, true);
 			Context::set('gender', $extend->gender, true);
 			Context::set('age', $extend->age, true);
-			
+
 			// 회원 모듈에 가입 요청
 			// try 를 쓰는이유는 회원가입시 어떤 실패가 일어나는 경우 BaseObject으로 리턴하지 않기에 에러를 출력하기 위함입니다.
 			try
@@ -338,7 +342,7 @@ class Connect extends Base
 				throw new Exception($exception->getMessage());
 			}
 			unset($_SESSION['tmp_sociallogin_input_add_info']);
-			
+
 			// 가입 도중 오류가 있다면 즉시 출력
 			if (is_object($output) && method_exists($output, 'toBool') && !$output->toBool())
 			{
@@ -472,7 +476,7 @@ class Connect extends Base
 		{
 			throw new Exception('already_logged');
 		}
-		
+
 		$service = $oDriver->getService();
 		$serviceAccessData = self::getDriverAuthData($service);
 		if (!$serviceAccessData->profile['sns_id'])
@@ -497,7 +501,7 @@ class Connect extends Base
 				$do_login = true;
 			}
 		}
-		
+
 		// 검색된 회원으로 로그인 진행
 		if ($do_login)
 		{
@@ -605,7 +609,7 @@ class Connect extends Base
 				$isCheck = true;
 			}
 		}
-		
+
 		if(!$isCheck)
 		{
 			return false;
@@ -646,10 +650,10 @@ class Connect extends Base
 		{
 			$args->password2 = $args->password;
 		}
-		
+
 		return $args;
 	}
-	
+
 	/**
 	 * 소셜 로그인에 필요한 정보를 세션에서 가져옴
 	 * @return false|stdClass
@@ -661,7 +665,7 @@ class Connect extends Base
 			$return_object = new \stdClass();
 			$return_object->nick_name = $_SESSION['tmp_sociallogin_input_add_info']['nick_name'];
 			$return_object->email_address = $_SESSION['tmp_sociallogin_input_add_info']['email_address'];
-			
+
 			return $return_object;
 		}
 		else
@@ -669,7 +673,7 @@ class Connect extends Base
 			return false;
 		}
 	}
-	
+
 	/**
 	 * @param $oDriver \Rhymix\Modules\Sociallogin\Drivers\Base
 	 * @param $sns_info
@@ -705,7 +709,7 @@ class Connect extends Base
 
 			executeQuery('sociallogin.updateMemberSns', $args);
 		}
-		
+
 		return $tokenData;
 	}
 }
