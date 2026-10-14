@@ -30,7 +30,11 @@ class Discord extends Base
 	 */
 	function authenticate()
 	{
-		$code = \Context::get('code');
+		// 위변조 체크
+		if (!\Context::get('code') || \Context::get('state') !== $_SESSION['sociallogin_auth']['state'])
+		{
+			return new \BaseObject(-1, 'msg_invalid_request');
+		}
 
 		$config = $this->config;
 		$post = [
@@ -38,7 +42,7 @@ class Discord extends Base
 			"client_id" => $config->discord_client_id,
 			"client_secret" => $config->discord_client_secret,
 			"redirect_uri" => getNotEncodedFullUrl('', 'module', 'sociallogin', 'act', 'procSocialloginCallback', 'service', 'discord'),
-			"code" => $code,
+			"code" => \Context::get('code'),
 		];
 		$token = $this->requestAPI('api/oauth2/token', $post);
 
@@ -51,6 +55,8 @@ class Discord extends Base
 		$accessValue['refresh'] = $token['refresh_token'];
 
 		\Rhymix\Modules\Sociallogin\Base::setDriverAuthData('discord', 'token', $accessValue);
+
+		return new \BaseObject();
 	}
 
 	/**

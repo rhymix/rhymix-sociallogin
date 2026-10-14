@@ -23,13 +23,16 @@ class Tiktok extends Base
 
 	function authenticate()
 	{
-		// 오류가 있을 경우 메세지 출력
-		$vars = Context::getRequestVars();
+		// 위변조 체크
+		if (!\Context::get('code') || \Context::get('state') !== $_SESSION['sociallogin_auth']['state'])
+		{
+			return new \BaseObject(-1, 'msg_invalid_request');
+		}
 
 		$post = [
 			"client_key" => $this->config->tiktok_client_key,
 			"client_secret" => $this->config->tiktok_client_secret,
-			"code" => $vars->code,
+			"code" => \Context::get('code'),
 			"grant_type" => "authorization_code",
 			"redirect_uri" => getNotEncodedFullUrl('', 'module', 'sociallogin', 'act', 'procSocialloginCallback', 'service', 'tiktok'),
 		];

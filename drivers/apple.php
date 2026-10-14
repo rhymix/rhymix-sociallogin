@@ -6,7 +6,7 @@ class Apple extends Base
 {
 	public $oProvider = null;
 	public $token = null;
-	
+
 	function getProvider()
 	{
 		// need setting to 60.
@@ -14,7 +14,7 @@ class Apple extends Base
 		{
 			\Firebase\JWT\JWT::$leeway = 60;
 		}
-		
+
 		if(!$this->oProvider)
 		{
 			$provider = new \League\OAuth2\Client\Provider\Apple([
@@ -24,13 +24,13 @@ class Apple extends Base
 				'keyFilePath' => $this->config->apple_file_path,
 				'redirectUri' => getNotEncodedFullUrl('', 'module', 'sociallogin', 'act', 'procSocialloginCallback','service','apple'),
 			]);
-			
+
 			$this->oProvider = $provider;
 		}
-		
+
 		return $this->oProvider;
 	}
-	
+
 	/**
 	 * @brief 인증 URL 생성
 	 */
@@ -42,9 +42,9 @@ class Apple extends Base
 			'state' => $_SESSION['sociallogin_auth']['state'],
 			'scope' => "name email",
 		];
-		
+
 		$authUrl = $provider->getAuthorizationUrl($options);
-		
+
 		return $authUrl;
 	}
 
@@ -53,18 +53,22 @@ class Apple extends Base
 	 */
 	function authenticate()
 	{
-		$provider = $this->getProvider();
+		// 위변조 체크
+		if (!\Context::get('code') || \Context::get('state') !== $_SESSION['sociallogin_auth']['state'])
+		{
+			return new \BaseObject(-1, 'msg_invalid_request');
+		}
 
+		$provider = $this->getProvider();
 		$token = $provider->getAccessToken('authorization_code', [
 			'code' => \Context::get('code'),
 		]);
-		
 		$accessValue['access'] = $token->getToken();
-		
+
 		\Rhymix\Modules\Sociallogin\Base::setDriverAuthData('apple', 'token', $accessValue);
-		
+
 		$this->token = $token;
-		
+
 		return new \BaseObject();
 	}
 
@@ -74,9 +78,9 @@ class Apple extends Base
 		{
 			return new \BaseObject(-1, 'msg_errer_api_connect');
 		}
-		
+
 		$provider = $this->getProvider();
-		
+
 		$user = $provider->getResourceOwner($this->token);
 		$profile = $user->toArray();
 
@@ -93,7 +97,7 @@ class Apple extends Base
 		{
 			$userName = $user->getFirstName() . ' ' . $user->getLastName();
 		}
-		
+
 		$profileValue['sns_id'] = $user->getId();
 		$profileValue['email'] = $profile['email'];
 		$profileValue['user_name'] = $userName;
@@ -102,7 +106,7 @@ class Apple extends Base
 		$_SESSION['social_apple_name'] = [
 			$user->getEmail() => $userName
 		];
-		
+
 		if ($profile['email'])
 		{
 			$profileValue['email_address'] = $profile['email'];
