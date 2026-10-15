@@ -153,7 +153,7 @@ class EventHandlers extends Base
 	{
 		$config = self::getConfig();
 
-		if (isset($config->sns_share_on_write) && $config->sns_share_on_write !== 'Y')
+		if (($config->sns_share_on_write ?? null) !== 'Y')
 		{
 			return;
 		}
